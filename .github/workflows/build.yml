@@ -1,4 +1,4 @@
-# Build and test mouse-rs on every push, and produce the Linux and Windows binaries.
+# Build and test dyavon on every push, and produce the Linux and Windows binaries.
 #
 # Builds made here are the ones SignPath Foundation can sign: it signs only binaries
 # built by CI from this repository, never files uploaded by hand. The signing step at
@@ -44,25 +44,25 @@ jobs:
         run: cargo test --workspace --quiet
 
       - name: Build Linux
-        run: cargo build --release -p mouse
+        run: cargo build --release -p dyavon
 
       - name: Build Windows
-        run: cargo build --release -p mouse --target x86_64-pc-windows-gnu
+        run: cargo build --release -p dyavon --target x86_64-pc-windows-gnu
 
       - name: Collect
         run: |
           mkdir -p out
-          cp target/release/mouse-rs out/
-          cp target/x86_64-pc-windows-gnu/release/mouse-rs.exe out/
+          cp target/release/dyavon out/
+          cp target/x86_64-pc-windows-gnu/release/dyavon.exe out/
           cp LICENSE NOTICE out/
-          (cd out && sha256sum mouse-rs mouse-rs.exe > SHA256SUMS)
+          (cd out && sha256sum dyavon dyavon.exe > SHA256SUMS)
 
       - name: Upload Linux build
         uses: actions/upload-artifact@v4
         with:
-          name: mouse-rs-linux-x86_64
+          name: dyavon-linux-x86_64
           path: |
-            out/mouse-rs
+            out/dyavon
             out/LICENSE
             out/NOTICE
 
@@ -70,9 +70,9 @@ jobs:
         id: upload-windows
         uses: actions/upload-artifact@v4
         with:
-          name: mouse-rs-windows-x86_64
+          name: dyavon-windows-x86_64
           path: |
-            out/mouse-rs.exe
+            out/dyavon.exe
             out/LICENSE
             out/NOTICE
 
@@ -84,7 +84,7 @@ jobs:
           connector-url: https://githubactions.connectors.signpath.io
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: mouse-rs
+          project-slug: dyavon
           signing-policy-slug: release-signing
           github-artifact-id: ${{ steps.upload-windows.outputs.artifact-id }}
           wait-for-completion: true

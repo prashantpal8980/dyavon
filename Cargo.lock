@@ -906,6 +906,101 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edf234dd1594d6dd434a8fb8cada51ddbbc593e40e4a01556a0b31c62da2775b"
 
 [[package]]
+name = "dyavon"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "dyavon-clipboard",
+ "dyavon-core",
+ "dyavon-engine",
+ "dyavon-input",
+ "gtk",
+ "iced",
+ "libc",
+ "rand",
+ "ring",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "tracing-subscriber",
+ "tray-icon",
+ "ureq",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "dyavon-clipboard"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "base64",
+ "clipboard-win",
+ "dyavon-core",
+ "fuser",
+ "png 0.17.16",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tokio",
+ "tracing",
+ "windows 0.62.2",
+ "windows-core 0.62.2",
+ "x11rb",
+]
+
+[[package]]
+name = "dyavon-core"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "futures",
+ "hmac",
+ "if-addrs",
+ "rand",
+ "rcgen",
+ "rustls",
+ "rustls-pemfile",
+ "serde",
+ "serde_json",
+ "sha2",
+ "socket2 0.5.10",
+ "spake2",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-rustls",
+ "tokio-util",
+ "tracing",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "dyavon-engine"
+version = "0.1.0"
+dependencies = [
+ "dyavon-core",
+ "dyavon-input",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "dyavon-input"
+version = "0.1.0"
+dependencies = [
+ "dyavon-core",
+ "libc",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "windows-sys 0.59.0",
+ "x11rb",
+]
+
+[[package]]
 name = "endi"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2370,101 +2465,6 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "mouse"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "gtk",
- "iced",
- "libc",
- "mouse-clipboard",
- "mouse-core",
- "mouse-engine",
- "mouse-input",
- "rand",
- "ring",
- "serde",
- "serde_json",
- "sha2",
- "tokio",
- "tokio-util",
- "tracing",
- "tracing-subscriber",
- "tray-icon",
- "ureq",
- "windows-sys 0.59.0",
-]
-
-[[package]]
-name = "mouse-clipboard"
-version = "0.1.0"
-dependencies = [
- "arboard",
- "base64",
- "clipboard-win",
- "fuser",
- "mouse-core",
- "png 0.17.16",
- "serde",
- "serde_json",
- "sha2",
- "tokio",
- "tracing",
- "windows 0.62.2",
- "windows-core 0.62.2",
- "x11rb",
-]
-
-[[package]]
-name = "mouse-core"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "futures",
- "hmac",
- "if-addrs",
- "rand",
- "rcgen",
- "rustls",
- "rustls-pemfile",
- "serde",
- "serde_json",
- "sha2",
- "socket2 0.5.10",
- "spake2",
- "thiserror 1.0.69",
- "tokio",
- "tokio-rustls",
- "tokio-util",
- "tracing",
- "windows-sys 0.59.0",
-]
-
-[[package]]
-name = "mouse-engine"
-version = "0.1.0"
-dependencies = [
- "mouse-core",
- "mouse-input",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "mouse-input"
-version = "0.1.0"
-dependencies = [
- "libc",
- "mouse-core",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "windows-sys 0.59.0",
- "x11rb",
 ]
 
 [[package]]

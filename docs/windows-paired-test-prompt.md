@@ -22,7 +22,7 @@ Two arms, one variable. That is what makes this run worth more than everything b
 `SetCursorPos`, or AutoHotkey-style helpers. Do not try to open the tray, the taskbar, or
 any menu.**
 
-This is not caution, it is a correctness requirement. When control is on the peer, mouse-rs
+This is not caution, it is a correctness requirement. When control is on the peer, Dyavon
 captures local mouse input and **forwards it to Kali**. A previous attempt to click the tray
 sent real clicks onto the owner's Kali desktop and never reached Windows at all, which is
 why it could not complete this step. Every action below is a shell command; none of them
@@ -36,9 +36,9 @@ what you are stuck on instead.
 Stop the running instance **by process, not by tray**:
 
 ```powershell
-Get-Process mouse-rs -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process dyavon -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 2
-Get-Process mouse-rs -ErrorAction SilentlyContinue   # expect no output
+Get-Process dyavon -ErrorAction SilentlyContinue   # expect no output
 ```
 
 Killing it is safe: Windows removes the low-level hooks when the process exits, so local
@@ -47,9 +47,9 @@ input returns to normal even if it was suppressing at the time.
 Download and verify:
 
 ```powershell
-Invoke-WebRequest -Uri http://192.168.137.2:8000/mouse-rs.exe -OutFile $HOME\mouse-rs\mouse-rs.exe
-(Get-Item $HOME\mouse-rs\mouse-rs.exe).Length
-(Get-FileHash $HOME\mouse-rs\mouse-rs.exe -Algorithm SHA256).Hash
+Invoke-WebRequest -Uri http://192.168.137.2:8000/dyavon.exe -OutFile $HOME\dyavon\dyavon.exe
+(Get-Item $HOME\dyavon\dyavon.exe).Length
+(Get-FileHash $HOME\dyavon\dyavon.exe -Algorithm SHA256).Hash
 ```
 
 Must be exactly size `13554688` bytes, SHA256
@@ -59,9 +59,9 @@ If either differs, stop and say so — do not launch it.
 Rotate the log so this run stands alone, then relaunch:
 
 ```powershell
-$log = "$env:USERPROFILE\.mouse_share\mouse-rs.log"
+$log = "$env:USERPROFILE\.dyavon\dyavon.log"
 if (Test-Path $log) { Move-Item $log "$log.prepaired" -Force }
-Start-Process $HOME\mouse-rs\mouse-rs.exe
+Start-Process $HOME\dyavon\dyavon.exe
 Start-Sleep -Seconds 6
 Get-Content $log -Tail 20
 ```
@@ -74,11 +74,11 @@ the byte size, the hash, and the connect line, and say **"ready"**.
 This build addresses a root cause that is now measured rather than theorised: **Windows does
 not deliver `WH_KEYBOARD_LL` callbacks to a process while that same process owns the
 foreground window.** Evidence — every crossing made with another process focused had a live
-hook (14, 20, 56 callbacks); crossings made with the mouse-rs panel focused had
+hook (14, 20, 56 callbacks); crossings made with the Dyavon panel focused had
 `hook_calls=0` while Raw Input counted up to 93 real keystrokes, and `mouse_calls=139`
 proved the same thread was still being called for the mouse.
 
-The fix: when a crossing begins and one of our own windows holds the foreground, mouse-rs
+The fix: when a crossing begins and one of our own windows holds the foreground, Dyavon
 hands the foreground to the window the user was last on, and hands it back on return. Look
 for this line, which should appear on every panel-focused crossing:
 
@@ -141,9 +141,9 @@ are being lost even when the hook is alive.
 
 ```powershell
 Invoke-WebRequest -Uri http://192.168.137.2:8001/paired.log -Method PUT `
-  -InFile $env:USERPROFILE\.mouse_share\mouse-rs.log
+  -InFile $env:USERPROFILE\.dyavon\dyavon.log
 Invoke-WebRequest -Uri http://192.168.137.2:8001/paired-report.md -Method PUT `
-  -InFile $HOME\mouse-rs\paired-report.md
+  -InFile $HOME\dyavon\paired-report.md
 ```
 
 Then **10 lines maximum** in chat: the per-crossing table in compact form, and the

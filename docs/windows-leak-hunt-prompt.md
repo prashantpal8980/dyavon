@@ -1,4 +1,4 @@
-This is a **single-bug hunt** on **mouse-rs**, not a feature pass. One question only:
+This is a **single-bug hunt** on **Dyavon**, not a feature pass. One question only:
 
 > **When the keyboard fails to follow the mouse to Kali, where does the keystroke actually
 > go, and why?**
@@ -14,7 +14,7 @@ Same wiring as before: this laptop = **SERVER** (`192.168.137.1`), Kali = **CLIE
 In real use the mouse crosses to Kali but the typing sometimes stays on Windows — roughly
 1 crossing in 10–20. The owner found the trigger:
 
-> **If the mouse-rs panel window is open when you cross, the keyboard is not shared.**
+> **If the Dyavon panel window is open when you cross, the keyboard is not shared.**
 
 That is what you are going to try to reproduce deliberately.
 
@@ -62,8 +62,8 @@ So a clean run is a real result here, and so is a leak — both are informative.
 Stop the running instance first (**tray → Quit**), then:
 
 ```powershell
-Invoke-WebRequest -Uri http://192.168.137.2:8000/mouse-rs.exe -OutFile $HOME\mouse-rs\mouse-rs.exe
-Get-FileHash $HOME\mouse-rs\mouse-rs.exe -Algorithm SHA256
+Invoke-WebRequest -Uri http://192.168.137.2:8000/dyavon.exe -OutFile $HOME\dyavon\dyavon.exe
+Get-FileHash $HOME\dyavon\dyavon.exe -Algorithm SHA256
 ```
 
 Must match exactly — size `13554688` bytes, SHA256
@@ -74,7 +74,7 @@ If it doesn't match, stop and tell me.
 one aside rather than deleting it:
 
 ```powershell
-$log = "$env:USERPROFILE\.mouse_share\mouse-rs.log"
+$log = "$env:USERPROFILE\.dyavon\dyavon.log"
 if (Test-Path $log) { Move-Item $log "$log.prev" -Force }
 ```
 
@@ -84,7 +84,7 @@ Then launch the panel and confirm Kali connects.
 
 This is the arm expected to fail. For each trial 1–10:
 
-1. **Click on the mouse-rs panel window** so it is unmistakably the foreground window.
+1. **Click on the Dyavon panel window** so it is unmistakably the foreground window.
    Click a neutral area — the header or a tab label — **not** a text field, and don't change
    any setting.
 2. Move the mouse across the configured edge to Kali.
@@ -117,7 +117,7 @@ The instrumentation writes these signatures. They are mutually exclusive diagnos
 which one appears *is* the answer, so quote them exactly rather than paraphrasing.
 
 ```powershell
-$log = "$env:USERPROFILE\.mouse_share\mouse-rs.log"
+$log = "$env:USERPROFILE\.dyavon\dyavon.log"
 Select-String -Path $log -Pattern 'KEYBOARD LEAK|pump stalled|keyboard grabbed|keyboard released'
 ```
 
@@ -163,8 +163,8 @@ Keep a brief eye out for regressions in both, but neither needs a deliberate tes
 **Do not paste the report or the log into chat.** Upload both:
 
 ```powershell
-Invoke-WebRequest -Uri http://192.168.137.2:8001/leak-hunt-report.md -Method PUT -InFile $HOME\mouse-rs\leak-hunt-report.md
-Invoke-WebRequest -Uri http://192.168.137.2:8001/leak-hunt.log -Method PUT -InFile $env:USERPROFILE\.mouse_share\mouse-rs.log
+Invoke-WebRequest -Uri http://192.168.137.2:8001/leak-hunt-report.md -Method PUT -InFile $HOME\dyavon\leak-hunt-report.md
+Invoke-WebRequest -Uri http://192.168.137.2:8001/leak-hunt.log -Method PUT -InFile $env:USERPROFILE\.dyavon\dyavon.log
 ```
 
 Also upload the Notepad buffer from arm B — it is direct physical evidence of which

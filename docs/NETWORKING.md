@@ -1,6 +1,6 @@
 # Networking: finding the peer and following the network
 
-mouse-rs works when both machines share **any** network: a direct Ethernet cable, a
+Dyavon works when both machines share **any** network: a direct Ethernet cable, a
 home router, Wi-Fi, or a phone hotspot. It does not depend on one fixed address, and it
 moves between networks without being restarted.
 
@@ -11,7 +11,7 @@ moves between networks without being restarted.
 | 24800 | TCP | Input link (keyboard, mouse, clipboard text) and the bulk lane for files |
 | 24801 | UDP | Discovery beacons (`discovery_port` in the config) |
 
-On Windows, allow mouse-rs through the firewall for **each** network profile it will be
+On Windows, allow Dyavon through the firewall for **each** network profile it will be
 used on (Private, and Public if you use a hotspot).
 
 ## How the client finds the server
@@ -64,6 +64,6 @@ a new `goes out through …` line naming the other interface.
 
 - **Client isolation.** Some guest Wi-Fi networks and hotspots block devices from talking
   to each other. Neither beacons nor connections can pass; use another network (B15).
-- **Different networks.** The machines must share at least one network. mouse-rs does not
+- **Different networks.** The machines must share at least one network. Dyavon does not
   relay through the internet (B16).
 - **IPv4 only** for beacons.

@@ -1,12 +1,12 @@
 # Code signing for Windows (free, through SignPath Foundation)
 
 Without a signature, Windows shows "Windows protected your PC / Unknown publisher" the
-first time someone runs `mouse-rs.exe`. The README tells users to click **More info →
+first time someone runs `dyavon.exe`. The README tells users to click **More info →
 Run anyway**. A signature replaces "Unknown publisher" with a real one.
 
 ## Why SignPath
 
-SignPath Foundation signs open-source projects for free. mouse-rs qualifies once:
+SignPath Foundation signs open-source projects for free. Dyavon qualifies once:
 
 - it is under an OSI-approved licence: **Apache-2.0** since 1 Nov 2026 ✅
 - its source is public on GitHub ✅ (from the 1.0.0 launch)
@@ -26,21 +26,21 @@ downloads of a new version until enough people have run it.
 1. Turn on **two-factor authentication** on GitHub (Settings → Password and
    authentication), if it isn't already on. SignPath requires it for everyone on the project.
 2. Apply at <https://signpath.org/apply> with:
-   - project: mouse-rs, <https://github.com/prashantpal8980/mouse-rs>
+   - project: Dyavon, <https://github.com/prashantpal8980/dyavon>
    - licence: Apache-2.0
-   - what is signed: `mouse-rs.exe`, built by GitHub Actions (`build.yml`)
+   - what is signed: `dyavon.exe`, built by GitHub Actions (`build.yml`)
 3. Wait for approval (days to weeks). SignPath then creates the project. Its
    organisation ID and an API token come with it.
 4. In the GitHub repo: **Settings → Secrets and variables → Actions**
    - secret `SIGNPATH_API_TOKEN` = the token
    - variable `SIGNPATH_ORGANIZATION_ID` = the organisation ID
-5. Ask SignPath for a signing policy named `release-signing` for the project `mouse-rs`,
+5. Ask SignPath for a signing policy named `release-signing` for the project `dyavon`,
    or change those two names in `build.yml` to whatever they create.
 
 ## After that
 
 Push a tag (`git tag v1.0.1 && git push origin v1.0.1`). The workflow builds, tests, and
-sends `mouse-rs.exe` to SignPath, which returns it signed. Attach the signed exe to the
+sends `dyavon.exe` to SignPath, which returns it signed. Attach the signed exe to the
 release in place of the locally built one, then run `scripts/sign-release.sh` so
 `latest.json` names its size and SHA-256.
 

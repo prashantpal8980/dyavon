@@ -1,4 +1,4 @@
-Roll mouse-rs on this machine back to the build it ran for the five weeks before
+Roll Dyavon on this machine back to the build it ran for the five weeks before
 2026-10-09, then start it and stop. **This is a rollback, not an update.**
 
 ## Why
@@ -45,18 +45,18 @@ iwr http://192.168.137.2:8000/rollback.ps1 -OutFile $env:TEMP\mr.ps1 -UseBasicPa
 text avoids that, and avoids the execution policy too, since nothing invokes a `.ps1`
 directly.
 
-The script stops before touching anything if the shell is not elevated — mouse-rs runs
+The script stops before touching anything if the shell is not elevated — Dyavon runs
 elevated, so an ordinary shell can neither stop it nor replace the file it holds open. It
 also verifies the download against its hash before replacing the exe, keeps the build it
-replaces as `mouse-rs.exe.bak`, re-hashes the installed file, and starts mouse-rs with the
+replaces as `dyavon.exe.bak`, re-hashes the installed file, and starts Dyavon with the
 elevation this shell already has. It prints what it did at each step and is safe to re-run.
 
 ## Step 4 — confirm it is up, then stop
 
 ```powershell
 Start-Sleep -Seconds 10
-Get-Process mouse-rs -ErrorAction SilentlyContinue | Select-Object Id,ProcessName
-Get-Content "$env:LOCALAPPDATA\mouse-rs\mouse-rs.log" -Tail 15
+Get-Process dyavon -ErrorAction SilentlyContinue | Select-Object Id,ProcessName
+Get-Content "$env:LOCALAPPDATA\dyavon\dyavon.log" -Tail 15
 ```
 
 Report at most five lines: the size, whether the hash matched, whether it is elevated,
@@ -72,7 +72,7 @@ behave the way they did before today.
 `SetCursorPos`, or AutoHotkey-style helpers. Do not click the tray, the taskbar, or any
 menu.**
 
-This is a correctness requirement, not caution. When control is on the peer, mouse-rs
+This is a correctness requirement, not caution. When control is on the peer, Dyavon
 captures local input and **forwards it to Kali** — a previous attempt to click the tray
 sent real clicks onto the owner's Kali desktop and never reached Windows at all. Every
 step above is a shell command; none need the pointer. If you want to click, stop and say

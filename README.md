@@ -1,13 +1,17 @@
 <div align="center">
 
-# 🖱️ mouse-rs
+# 🖱️ Dyavon
+
+### *Your cursor knows no border.*
+
+*Dyavon* (say **DAY-uh-von**, or just **D1**)
 
 **One keyboard. One mouse. All your computers.**
 
 Move your pointer off the edge of your Windows screen and keep working on Linux.<br>
 Your keyboard follows, and so does your clipboard.
 
-![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?logo=linux&logoColor=black) ![Rust](https://img.shields.io/badge/built%20with-Rust-B7410E?logo=rust&logoColor=white) ![Tests](https://img.shields.io/badge/tests-342%20passing-2EA043) ![Licence](https://img.shields.io/badge/licence-Apache--2.0-2EA043)
+![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?logo=linux&logoColor=black) ![Rust](https://img.shields.io/badge/built%20with-Rust-B7410E?logo=rust&logoColor=white) ![Tests](https://img.shields.io/badge/tests-345%20passing-2EA043) ![Licence](https://img.shields.io/badge/licence-Apache--2.0-2EA043)
 
 [Install](#-install) · [Connect your computers](#-connect-your-computers) · [Update](#-update) · [Report a problem](#-report-a-problem) · [Troubleshooting](#-troubleshooting) · [For developers](#-for-developers)
 
@@ -30,26 +34,39 @@ Your keyboard follows, and so does your clipboard.
 
 ---
 
+## 🏛️ Why "Dyavon"?
+
+The name comes from the Greek **δυάς** (*dyás*), "a pair": two things that work as one.
+That is what Dyavon does. Two computers, two screens, two operating systems, and one
+keyboard and one mouse driving them both as if they were a single machine. The pointer
+leaves one screen and arrives on the other, and the border between them stops existing.
+
+**Dy-** is the pair. **-avon** is the old Celtic word for a river (Welsh *afon*), the
+current that runs between them. Two machines, one stream of input flowing across.
+*Your cursor knows no border.*
+
+---
+
 ## 📦 Install
 
-Install mouse-rs on every computer you want to share between. Windows and Linux can be
+Install Dyavon on every computer you want to share between. Windows and Linux can be
 mixed in any combination. It takes about a minute per computer, and nothing needs a reboot.
 
 ### 🪟 Windows 10 and 11
 
-1. Download **`mouse-rs-<version>-windows-x86_64.zip`** from the [Releases](../../releases/latest) page.
-2. Extract it anywhere, for example to your Documents folder, and double-click **`mouse-rs.exe`**.
-3. Windows may say **"Windows protected your PC"** the first time, because mouse-rs is new
+1. Download **`dyavon-<version>-windows-x86_64.zip`** from the [Releases](../../releases/latest) page.
+2. Extract it anywhere, for example to your Documents folder, and double-click **`dyavon.exe`**.
+3. Windows may say **"Windows protected your PC"** the first time, because Dyavon is new
    and not yet code-signed. Click **More info**, then **Run anyway**.
 4. When Windows Firewall asks, tick **Private networks** and click **Allow access**.
 
 ### 🐧 Linux (X11 desktops)
 
-1. Download **`mouse-rs-<version>-linux-x86_64.tar.gz`** from the [Releases](../../releases/latest) page.
+1. Download **`dyavon-<version>-linux-x86_64.tar.gz`** from the [Releases](../../releases/latest) page.
 2. Extract it and start it:
    ```sh
-   tar xzf mouse-rs-*-linux-x86_64.tar.gz
-   cd mouse-rs-*-linux-x86_64
+   tar xzf dyavon-*-linux-x86_64.tar.gz
+   cd dyavon-*-linux-x86_64
    ./run.sh
    ```
 3. If it says a library is missing, install these once, then run it again:
@@ -64,19 +81,19 @@ mixed in any combination. It takes about a minute per computer, and nothing need
 
 ## 🔗 Connect your computers
 
-You do this once per computer. Afterwards mouse-rs connects by itself whenever it starts.
+You do this once per computer. Afterwards Dyavon connects by itself whenever it starts.
 
 1. On the computer whose keyboard and mouse you use, choose **Shares its mouse**.
 2. On each other computer, choose **Is controlled**.
 3. On the computer that shares its mouse, press **Pair a new device**. A 6-digit code appears.
-4. Type that code into the other computer's mouse-rs window and press **Pair**.
+4. Type that code into the other computer's Dyavon window and press **Pair**.
 
 That's all. Push the pointer off the edge of the screen and it appears on the other
 computer. To pair a third computer, repeat steps 2–4. Switch between them with
 **Ctrl+Alt+Shift+number**, or **Use** on the main window.
 
 **Optional:**
-- **Settings › Startup › Start at login**, so mouse-rs is running whenever you are.
+- **Settings › Startup › Start at login**, so Dyavon is running whenever you are.
 - **Settings › Screens & edges**: click the edge where the other screen sits.
 - **Settings › Security & pairing**: set a connection PIN on a computer that is controlled.
 - **Type your Linux login password from the other keyboard:** on Linux, turn on
@@ -87,28 +104,28 @@ computer. To pair a third computer, repeat steps 2–4. Switch between them with
 
 ## 🔄 Update
 
-mouse-rs checks for a new version each time it starts. When one is available, a banner
-says so. Click **Update now**, then **Restart mouse-rs**. You can also check yourself:
+Dyavon checks for a new version each time it starts. When one is available, a banner
+says so. Click **Update now**, then **Restart Dyavon**. You can also check yourself:
 **⋯ › Settings › About › Check now**.
 
-Your settings and pairings are kept: they live in `%USERPROFILE%\.mouse_share\` on
-Windows and `~/.mouse_share/` on Linux, outside the program folder.
+Your settings and pairings are kept: they live in `%USERPROFILE%\.dyavon\` on
+Windows and `~/.dyavon/` on Linux, outside the program folder.
 
 ---
 
 ## 🐞 Report a problem
 
-Open an issue at **[github.com/prashantpal8980/mouse-rs/issues](https://github.com/prashantpal8980/mouse-rs/issues/new)**
+Open an issue at **[github.com/prashantpal8980/dyavon/issues](https://github.com/prashantpal8980/dyavon/issues/new)**
 (a free GitHub account is needed). Questions and ideas are welcome there too.
 
-Every computer keeps a log of what mouse-rs did (**Settings › Diagnostics** shows where).
+Every computer keeps a log of what Dyavon did (**Settings › Diagnostics** shows where).
 Attach it to your report:
 
 | Computer | Log file |
 |---|---|
-| Windows | `%USERPROFILE%\.mouse_share\mouse-rs.log` |
-| Linux | `~/.mouse_share/mouse-rs.log` |
-| Linux login screen | `/var/lib/mouse-rs/.mouse_share/mouse-rs.log` |
+| Windows | `%USERPROFILE%\.dyavon\dyavon.log` |
+| Linux | `~/.dyavon/dyavon.log` |
+| Linux login screen | `/var/lib/dyavon/.dyavon/dyavon.log` |
 
 Please include what you did, what happened instead, roughly when (the log is
 timestamped), and the logs from both computers. The logs never contain your pairing keys
@@ -120,9 +137,9 @@ or what you type at the login screen.
 
 | Symptom | Try this |
 |---|---|
-| **Waiting for the other computer** forever | Both computers must be on the same network. Some guest Wi-Fi and hotspots stop devices from seeing each other. On Windows, allow mouse-rs in Windows Firewall for that network type. |
+| **Waiting for the other computer** forever | Both computers must be on the same network. Some guest Wi-Fi and hotspots stop devices from seeing each other. On Windows, allow Dyavon in Windows Firewall for that network type. |
 | **"Not paired"** or **"could not prove it is the one you paired with"** | One computer was removed or reinstalled. Pair them again with a new code. |
-| The pointer won't cross | Check **Screens & edges** matches where the other screen physically is. On Windows, an administrator window with focus can block the pointer; mouse-rs tells you when this happens. |
+| The pointer won't cross | Check **Screens & edges** matches where the other screen physically is. On Windows, an administrator window with focus can block the pointer; Dyavon tells you when this happens. |
 | A key seems stuck | Press and release it once on the computer you're typing on. **Scroll Lock** always returns control. |
 | Linux says a library is missing | `sudo apt install libgtk-3-0 libayatana-appindicator3-1` |
 
@@ -136,14 +153,14 @@ Known issues, with their status, are listed in [docs/KNOWN-ISSUES.md](docs/KNOWN
 <summary><b>Build and test</b></summary>
 
 ```sh
-cargo build --release                                   # Linux: target/release/mouse-rs
+cargo build --release                                   # Linux: target/release/dyavon
 cargo build --release --target x86_64-pc-windows-gnu    # Windows exe, cross-compiled
 cargo test --workspace                                  # 227 tests
 cargo clippy --workspace --all-targets                  # lint (also with --target x86_64-pc-windows-gnu)
 bash scripts/package.sh                                 # release zip + tarball + SHA256SUMS in dist/
 ```
 
-The Linux GUI links `libxdo`. `crates/mouse/build.rs` points the linker at the tracked
+The Linux GUI links `libxdo`. `crates/dyavon/build.rs` points the linker at the tracked
 `.buildlibs/libxdo.so`, so a plain `cargo build` works without `libxdo-dev`. See
 [docs/PACKAGING.md](docs/PACKAGING.md) for cross-compiling.
 
@@ -153,12 +170,12 @@ The Linux GUI links `libxdo`. `crates/mouse/build.rs` points the linker at the t
 <summary><b>Command line</b></summary>
 
 ```sh
-mouse-rs                    # control panel (default)
-mouse-rs server             # headless server
-mouse-rs client             # headless client
-sudo mouse-rs greeter-install     # install / refresh the login-screen service
-mouse-rs greeter-status           # check it (no sudo)
-sudo mouse-rs greeter-uninstall   # remove it
+dyavon                    # control panel (default)
+dyavon server             # headless server
+dyavon client             # headless client
+sudo dyavon greeter-install     # install / refresh the login-screen service
+dyavon greeter-status           # check it (no sudo)
+sudo dyavon greeter-uninstall   # remove it
 ```
 
 </details>
@@ -166,7 +183,7 @@ sudo mouse-rs greeter-uninstall   # remove it
 <details>
 <summary><b>Configuration</b></summary>
 
-`~/.mouse_share/config.json` (Windows: `%USERPROFILE%\.mouse_share\config.json`). It's
+`~/.dyavon/config.json` (Windows: `%USERPROFILE%\.dyavon\config.json`). It's
 written by the panel with mode `0600`; [config.example.json](config.example.json) lists
 every field.
 
@@ -203,10 +220,10 @@ flowchart LR
 
 ```
 crates/
-  mouse-core/       config, protocol, HMAC auth, TLS link, heartbeat, beacons, network watcher, bulk lane
-  mouse-input/      capture/injection: X11/XTEST, uinput, Windows Raw Input + SendInput
-  mouse-engine/     edge-crossing state machine, link status
-  mouse-clipboard/  text, image, file and folder sync, history, file holder
+  dyavon-core/       config, protocol, HMAC auth, TLS link, heartbeat, beacons, network watcher, bulk lane
+  dyavon-input/      capture/injection: X11/XTEST, uinput, Windows Raw Input + SendInput
+  dyavon-engine/     edge-crossing state machine, link status
+  dyavon-clipboard/  text, image, file and folder sync, history, file holder
   mouse/            binary: CLI, iced panel, tray, notifications, login-screen service, log shipping
 ```
 

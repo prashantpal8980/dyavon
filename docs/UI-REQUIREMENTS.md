@@ -68,7 +68,7 @@ Note: machine name is treated as restart-requiring even though an earlier draft 
 as immediate — it is sent in the handshake, so the peer keeps showing the old name until
 the session is remade.
 
-Covered by tests in `crates/mouse/src/gui.rs`: only-changed-settings are listed, immediate
+Covered by tests in `crates/dyavon/src/gui.rs`: only-changed-settings are listed, immediate
 settings raise no prompt, and screen width+height count as one change (so the "N changes"
 count is not overstated).
 
@@ -120,9 +120,9 @@ re-author them.
 | R16 | The Layout tab must show only what **this machine's role** actually uses | **done** (2026‑09‑02) | Agreed 2026‑07‑31. Verified again before building rather than taken on trust: `client.rs:37` reads `entry_edge` and the client engine never mentions `exit_edge`, while `server.rs:50` reads both and checks they oppose. So on a client the Exit-edge picker wrote a value nothing would read — the original dead knob — and the overlap ⚠ compared that dead value against the live one, so it could contradict a correctly-configured pair. **Built:** the picker and the warning appear only on the server; the client shows Entry edge alone, labelled for what it does there ("where the pointer arrives, and where to push back") with a line saying why there is no exit edge, rather than silently omitting it. Three tests pin the decisions. Full reasoning in `docs/mockups/edges-explained.html`. |
 | R17 | Clipboard history is a **clipboard manager**, not a log — entries must be re-usable | **done** (2026‑08‑04) | The owner confirms this was always the intent; building it as a view-only log was a misread of the requirement, not a scope change. Entries used to be non-interactive `container`s with no `on_press`, and an image was stored as the label string `[image 800×600, 240 KB]` with the pixels discarded. Now: every row is a button that puts the item back on the clipboard and syncs it to the peer like a fresh copy; images keep their encoded PNG; repeats move to the front instead of duplicating; pin protects an entry from eviction and from Clear. |
 | R18 | Copy **any file** between machines through the clipboard, extension-agnostic | **in progress** | Asked for 2026‑08‑04. HTML, exe, ISO — no allow-list. Under the user's auto threshold it transfers silently; above it, a non-blocking prompt asks first. Must never degrade mouse/keyboard latency. Exceeds Windows' own clipboard history, which retains no files at all. Full design in `docs/mockups/clipboard-manager-plan.html`. **Built 2026‑08‑04, whole path:** bulk lane (second connection, lane negotiated in the handshake so one port still suffices, binary framing, RTT-paced); `CF_HDROP` on Windows and an X11 selection owner on Linux; content-addressed cache with verification, dedup, resume and pinning-aware eviction; receiver-side auto/ask decision; entry states including moved-or-deleted and changed; non-focus-stealing consent banner; large images moved off the input lane too. **Not yet exercised on hardware.** Folders are copied whole and rebuilt with their structure intact. **Completed 2026‑08‑14:** cancel on a running transfer (both ends — the receiver's Stop sends `BlobCancel` so the *sender* stops too, rather than only hiding the progress); a real progress bar; **Not now** and **Always allow ‹size›** on the banner; a desktop notification and a tray tooltip when something is waiting; empty directories inside a copied folder now recreated; following symlinks is a setting, with loop detection when on. Also fixed: the sender read a whole file into an unbounded queue as fast as the disk allowed, so a 4 GB copy meant ~4 GB of RAM — it is now bounded by a configurable send buffer, which is what the plan's cost table always claimed. **Remaining gap:** Windows shows the tray tooltip but no toast (that needs an app user model ID registered at install time), and X11 file publishing still dies with the process. |
-| R20 | The panel must say when Windows is blocking input, and offer elevated autostart | **done** (2026‑08‑15) | Reported as "I can't cross while Genshin Impact is in front". Cause: Windows UIPI — the OS does not call a lower-integrity process's `WH_MOUSE_LL`/`WH_KEYBOARD_LL` hooks while an elevated window has the foreground, so the pointer is never seen reaching the edge and no crossing is attempted. Not fixable in-process; running elevated is the only remedy. Built: a status line on the Startup tab stating which state this machine is in and what it costs, a **Start at login as administrator** toggle backed by a Task Scheduler `ONLOGON /RL HIGHEST` task (the only mechanism that starts elevated at login without a UAC prompt every time), and a log warning naming the offending window and both integrity levels. The toggle needs mouse-rs itself elevated to register the task, and says so when refused rather than reporting a bare error. |
+| R20 | The panel must say when Windows is blocking input, and offer elevated autostart | **done** (2026‑08‑15) | Reported as "I can't cross while Genshin Impact is in front". Cause: Windows UIPI — the OS does not call a lower-integrity process's `WH_MOUSE_LL`/`WH_KEYBOARD_LL` hooks while an elevated window has the foreground, so the pointer is never seen reaching the edge and no crossing is attempted. Not fixable in-process; running elevated is the only remedy. Built: a status line on the Startup tab stating which state this machine is in and what it costs, a **Start at login as administrator** toggle backed by a Task Scheduler `ONLOGON /RL HIGHEST` task (the only mechanism that starts elevated at login without a UAC prompt every time), and a log warning naming the offending window and both integrity levels. The toggle needs Dyavon itself elevated to register the task, and says so when refused rather than reporting a bare error. |
 | R19 | Every clipboard limit must be **user-configurable**, split Basic / Advanced | **partly done** (2026‑08‑04) | A slow setting the user chose deliberately is their trade to make; the software's job is to state the cost, not refuse the value. **Built:** history size (Basic); sync-text, sync-images, biggest-item MB, memory-budget MB and largest-image-edge px (Advanced), with live worst-case cost lines for the memory budget and the image limit. `MAX_TEXT_BYTES`, `MAX_IMAGE_BYTES` and `MAX_IMAGE_PIXELS` are gone as hardcoded constants. **Also built:** ask-before-sending threshold (Basic), sync-files, disk budget for transferred files, and the bulk lane's own enable/port (Advanced). **Completed 2026‑08‑04 after an audit found them missing:** keep-history-after-restart (Basic, with the privacy cost stated), skip-prompt-when-quick (measured, not guessed), pause-while-crossed, and a user-pinned transfer speed limit. Pause-while-crossed had been the worse case — it existed and was tested but nothing ever called it or set the flag it read, so it was dead code rather than a missing feature. **2026‑08‑14:** added a send-buffer size, follow-symlinks and notify toggles — and fixed a quieter version of the same defect: *every* clipboard and bulk setting was read once at Start and none of them were in the restart-required list, so editing one while sharing was live changed the panel and nothing else, with no prompt. They are all listed now, except the ask-first limit, which is pushed to the running thread instead. |
-| R21 | Share the keyboard and mouse **at the Linux login screen**, so the password can be typed from the peer | **built, untested on hardware** (2026‑10‑08) | Asked for 2026‑10‑08: "I just want it to autostart before inputting the password". Autostart is an XDG desktop entry, so it fires when the XFCE session starts — after SDDM has taken the password — and Linux injection used XTEST, which is bound to one X server through `DISPLAY` and an auth cookie that does not exist yet at the greeter. So the only way to log in was to plug a second keyboard into the machine that already had one attached to its peer. **Built:** a `uinput` injection backend (`crates/mouse-input/src/uinput.rs`) that creates a virtual keyboard and an absolute pointer at kernel level, so events reach whatever is in front — greeter, session, text console or a Wayland compositor — with nothing session-specific to break; a `greeter` mode that runs as a client with no clipboard and reads a root-owned config from `/etc/mouse-rs/`, because a pre-login service must not depend on `/home` being mounted; `greeter-install` / `-uninstall` / `-selftest` subcommands; and a hardened system unit that hands over the moment logind reports an active graphical session, since two clients injecting one stream would double every keystroke. The pointer is absolute-only on purpose — a relative virtual device is subject to local pointer acceleration, so remote motion would mean different distances on the two machines. **Cost, stated deliberately:** it is a network-driven keystroke injector running before anyone has authenticated, so `shared_secret` becomes what stands between the LAN and this machine's login prompt. Off unless installed by hand. **Not offered:** greeter mode as a *server*, which would mean capturing this machine's keyboard pre-login — a different and much larger capability. 18 tests, including `systemd-analyze verify` on the generated unit and the real `CLASS=greeter` / `CLASS=manager` records this machine produces. **2026‑10‑08, same day:** asked for it as a toggle rather than a command — now on the Startup tab, gated the first time by a one-time panel stating the cost (the pattern agreed for R20: a choice plus a warning shown once, whichever way it is answered). The panel has no privilege, so it asks `pkexec` and the desktop's own agent prompts — the password never passes through mouse-rs. The toggle reads back from systemd rather than from a saved setting, so it reflects `systemctl` changes made outside the app and refuses to move if the prompt is dismissed; it reports *enabled*, not *running*, because the service is deliberately stopped throughout a session. Added `greeter-status` for an unprivileged check. Gating the new `Message` variants to Linux was required, not tidiness: declaring them unconditionally while handling them only on Linux broke the Windows build on a non-exhaustive match. |
+| R21 | Share the keyboard and mouse **at the Linux login screen**, so the password can be typed from the peer | **built, untested on hardware** (2026‑10‑08) | Asked for 2026‑10‑08: "I just want it to autostart before inputting the password". Autostart is an XDG desktop entry, so it fires when the XFCE session starts — after SDDM has taken the password — and Linux injection used XTEST, which is bound to one X server through `DISPLAY` and an auth cookie that does not exist yet at the greeter. So the only way to log in was to plug a second keyboard into the machine that already had one attached to its peer. **Built:** a `uinput` injection backend (`crates/dyavon-input/src/uinput.rs`) that creates a virtual keyboard and an absolute pointer at kernel level, so events reach whatever is in front — greeter, session, text console or a Wayland compositor — with nothing session-specific to break; a `greeter` mode that runs as a client with no clipboard and reads a root-owned config from `/etc/dyavon/`, because a pre-login service must not depend on `/home` being mounted; `greeter-install` / `-uninstall` / `-selftest` subcommands; and a hardened system unit that hands over the moment logind reports an active graphical session, since two clients injecting one stream would double every keystroke. The pointer is absolute-only on purpose — a relative virtual device is subject to local pointer acceleration, so remote motion would mean different distances on the two machines. **Cost, stated deliberately:** it is a network-driven keystroke injector running before anyone has authenticated, so `shared_secret` becomes what stands between the LAN and this machine's login prompt. Off unless installed by hand. **Not offered:** greeter mode as a *server*, which would mean capturing this machine's keyboard pre-login — a different and much larger capability. 18 tests, including `systemd-analyze verify` on the generated unit and the real `CLASS=greeter` / `CLASS=manager` records this machine produces. **2026‑10‑08, same day:** asked for it as a toggle rather than a command — now on the Startup tab, gated the first time by a one-time panel stating the cost (the pattern agreed for R20: a choice plus a warning shown once, whichever way it is answered). The panel has no privilege, so it asks `pkexec` and the desktop's own agent prompts — the password never passes through dyavon. The toggle reads back from systemd rather than from a saved setting, so it reflects `systemctl` changes made outside the app and refuses to move if the prompt is dismissed; it reports *enabled*, not *running*, because the service is deliberately stopped throughout a session. Added `greeter-status` for an unprivileged check. Gating the new `Message` variants to Linux was required, not tidiness: declaring them unconditionally while handling them only on Linux broke the Windows build on a non-exhaustive match. |
 | R22 | Keep working **whichever network** the two machines share — Ethernet, Wi-Fi, a shared router, or a phone hotspot — with no address typed in, and follow a change of network | **built, untested on two machines** (2026‑10‑12) | Asked 2026‑10‑12: a cable unplugged, a move from Wi-Fi to Ethernet for speed, and both machines disconnected all have to keep working. Built as: the server beacons a signed list of its addresses on each network (`beacon.rs`, UDP 24801); the client races every address it knows and keeps the first to answer; a change of network drops the session at once and reconnects; an authenticated new connection replaces a stale session. With no network the client says so rather than "server not found". |
 | R23 | **All settings in one place: ⋯ → Settings**, out of the tabs. The main window keeps status, Start/Stop and the clipboard history | **built 2026-10-14, awaiting the owner's review** | Owner, 2026-10-13. Supersedes R10 for the clipboard *settings*; the clipboard *history* stays on the main window. Plan: [PLAN-SETTINGS-AND-LAUNCH.md](PLAN-SETTINGS-AND-LAUNCH.md) Part A |
 | R24 | Settings **grouped by function with sub-sections**, like Android's Settings (Connection, Screens & edges, Keyboard, Clipboard, Startup, Security, Appearance, Diagnostics, About) | **built 2026-10-14, awaiting the owner's review** | Owner, 2026-10-13. Categories proposed in the plan, for the owner to confirm |
@@ -162,7 +162,7 @@ re-author them.
   restart prompt like other engine settings. `warp_threshold_px` was removed from the config;
   old files that still carry it load fine.
 - **Moved out of the ⋯ menu:** theme → Appearance, Restore defaults → About.
-- **Screenshot aid:** `MOUSE_RS_OPEN_SETTINGS=<page>` opens the panel at a page with its
+- **Screenshot aid:** `DYAVON_OPEN_SETTINGS=<page>` opens the panel at a page with its
   Advanced section open ("index" for the list).
 
 ### R31 — main window restyled (built 2026-10-14)
@@ -186,7 +186,7 @@ screen; the login-screen copy checks it itself. The idle **screen lock** while s
 when "Ask when someone is logged in here" is on; a separate lock-screen check is v1.1 (the launch plan's cut list).
 
 - The owner's rule: before the other computer's keyboard can type into a login or lock screen, the
-  person must give a **mouse-rs unlock password**. It is separate from the OS login password, and
+  person must give a **Dyavon unlock password**. It is separate from the OS login password, and
   its purpose is to stop anyone at the paired machine from brute-forcing the login password.
 - The protected machine checks the password itself; it never trusts the other side's word. Wrong
   tries are limited and slowed.
@@ -197,10 +197,10 @@ when "Ask when someone is logged in here" is on; a separate lock-screen check is
 ### R33 — quitting means quitting (agreed 2026-10-15)
 
 - The owner's rule: closing the window (×), **⋯ → Quit**, tray Quit and **Stop sharing** stop
-  mouse-rs at once. Nothing keeps running in the background after that: no helper process, no
+  Dyavon at once. Nothing keeps running in the background after that: no helper process, no
   daemon, nothing holding the clipboard. "If I close any application, it means that I don't want
   that application to work right now."
-- Once mouse-rs has quit, what it copied stops being pasteable, and a transfer in flight stops.
+- Once Dyavon has quit, what it copied stops being pasteable, and a transfer in flight stops.
   That is expected, not a bug.
 - **The one exception is a warning, never a refusal.** If a file is still being copied in either
   direction, quitting or stopping first shows "Quit while a transfer is running?" with
@@ -218,9 +218,9 @@ when "Ask when someone is logged in here" is on; a separate lock-screen check is
 - **Long names wrap.** A file name in the clipboard history breaks anywhere when it has to, so it
   never runs out over the 📍 and ✕ buttons.
 - **One Clear.** The history card had two "Clear" buttons: one cleared the history, the other
-  deleted received-file copies. Now there is one. It clears the history and deletes mouse-rs's
+  deleted received-file copies. Now there is one. It clears the history and deletes Dyavon's
   own copies of received files. Pinned entries and running transfers are kept, and pasted files
-  are never touched. The disk line stays as information: "received files kept by mouse-rs: …".
+  are never touched. The disk line stays as information: "received files kept by dyavon: …".
 - **Detect explains itself.** A hover tip on the button, and a line under the field: what the
   address is for, and that Detect searches the network for the server.
 - **At a glance is clearly read-only.** A subtitle says so, and each line opens the Settings page
@@ -238,13 +238,13 @@ Timing and try limits are listed in `docs/LAUNCH-PLAN.md`.
 ### R36 — update notice (agreed 2026-10-26, built 2026-10-29)
 When a newer version is published, the app says so ("Version x.y is available") and offers **Update**.
 Users won't go looking on a website, so without this nobody updates. The check runs at start and once a day,
-only while mouse-rs is running (R33).
+only while Dyavon is running (R33).
 - **As built:** each release has `latest.json` (version, notes, and per system the file's URL, size, SHA-256) and
   `latest.json.sig`, an Ed25519 signature made by `scripts/sign-release.sh` with the key in
-  `~/.config/mouse-rs-release/` (never in the repo; losing it means no installed copy accepts an update again).
+  `~/.config/dyavon-release/` (never in the repo; losing it means no installed copy accepts an update again).
   The app trusts nothing unsigned, and a download only if size and hash match.
 - Banner: **Version x.y is available** — Update / Later (Later hides it until the next start). Update downloads next
-  to the program, checks it, swaps it in, then shows **Version x.y is installed — Restart mouse-rs** (owner, 29 Oct: name the app, so nobody thinks the computer
+  to the program, checks it, swaps it in, then shows **Version x.y is installed — Restart Dyavon** (owner, 29 Oct: name the app, so nobody thinks the computer
   restarts). It restarts only the app and goes through
   the "transfer running" warning (R33) and the new copy waits for the old one to exit.
 - If the folder cannot be written (installed somewhere only an administrator can change): "The update did not
@@ -252,8 +252,8 @@ only while mouse-rs is running (R33).
 - About: version, Updates status + **Check now**, "Check for updates automatically" (on by default).
 - On Linux the login-screen copy is not updated by this; the existing "login screen runs an older copy" notice
   asks to reinstall it.
-- Addresses: `https://github.com/prashantpal8980/mouse-rs-downloads/releases/latest/download/latest.json`.
-  Test builds set `MOUSE_RS_UPDATE_URL` / `MOUSE_RS_VERSION` at build time (`scripts/fake-release.sh`).
+- Addresses: `https://github.com/prashantpal8980/dyavon/releases/latest/download/latest.json`.
+  Test builds set `DYAVON_UPDATE_URL` / `DYAVON_VERSION` at build time (`scripts/fake-release.sh`).
 
 ### R37 — no manual network setup (agreed 2026-10-26)
 A user who can't set a static IP must still be able to connect. Two devices on the same Wi-Fi, hotspot or
@@ -270,7 +270,7 @@ Typing an IP address stays available as an Advanced option.
 - **Reminder:** while the logged-in switch is off, the client's main window shows a reminder at most once a day:
   Set a password / Not now / Don't show this again.
 - **Typed once per run on the server:** the box appears on the server's main window when the client refuses; what was
-  typed is kept for that client until mouse-rs restarts on the server. The client retries every 2 s while waiting.
+  typed is kept for that client until Dyavon restarts on the server. The client retries every 2 s while waiting.
 - **Wrong tries:** 3, then the client accepts none for 1 hour; 3 more, 2 hours; then 4, 8… A correct one resets it.
   (Owner's words: "locked for 1 hour… 3 more tries… increased to 2 hours". Doubling after that is an assumption.)
 - **Change / turn off / forgot:** on the client, with no old password asked: being at the computer is the proof.
@@ -290,7 +290,7 @@ other takes over, and the network watch switches back when it returns.
 
 
 ### R40 — full app redesign from the owner's Claude Design file (agreed 2026-10-28)
-The owner designed every screen in Claude Design ("mouse-rs App Screens", 20 screens: M1–M6 main window, S0–S10
+The owner designed every screen in Claude Design ("dyavon App Screens", 20 screens: M1–M6 main window, S0–S10
 settings, B1 banners, D1–D2 dialogs) and asked for it to be implemented as shown. Owner: "I liked the very idea how it
 is looking right now… there are six colour implementations… implement that UI".
 - **Six new themes** replace the old six: Graphite (dark, cyan), **Amber (dark, default)**, Plum & Cream, Forest &
@@ -326,7 +326,7 @@ permissions… then set the password and only then" can the login screen be type
   forced on. Then the system's own password prompt (pkexec) installs the service with that PIN in its copy of the
   settings. The PIN comes before the system prompt so the installed copy is never PIN-less.
 - **Windows, Start at login as administrator:** from a normal window it now shows Windows' own Yes/No prompt; on Yes a
-  short elevated `mouse-rs autostart-elevated-on|off` makes the change. It no longer refuses with "restart as
+  short elevated `dyavon autostart-elevated-on|off` makes the change. It no longer refuses with "restart as
   administrator first".
 - **Parked (owner, 28 Oct): typing into the Windows sign-in/lock screen is not in v1.0.** Windows shows that screen on
   a separate secure desktop that an ordinary or administrator program cannot reach; only a system service could. That
@@ -340,9 +340,9 @@ or one already in use, and a port typed there should get the permission it needs
 - Placeholder `e.g. 24802`; the line under it says blank shares the main port and that both computers need the same port.
 - Refused, with the reason in red and the old value kept: below 1024 (system services), and on the server a port
   another program already holds (tried by binding it). The main port and this session's own lane port are fine.
-- Windows server with its own lane port and no firewall rule for mouse-rs: an "Allow…" button adds one inbound rule
-  for the mouse-rs program (all ports, all network profiles) through Windows' Yes/No prompt
-  (`mouse-rs firewall-allow`, elevated). Linux desktops have no firewall on by default, so nothing to add there.
+- Windows server with its own lane port and no firewall rule for dyavon: an "Allow…" button adds one inbound rule
+  for the Dyavon program (all ports, all network profiles) through Windows' Yes/No prompt
+  (`dyavon firewall-allow`, elevated). Linux desktops have no firewall on by default, so nothing to add there.
 
 ### R43 — screens & edges decided on the computer with the mouse (agreed 2026-10-28)
 Owner: on Kali (client) the side was changed but the crossing did not change; the picture did not say where the pointer
@@ -383,7 +383,7 @@ which is offering this pairing", and asked what happens when roles are swapped.
 ### R36 addendum — install from About too (agreed 2026-10-30)
 Owner: after **About → Check now** finds a version, the next step must be right there: "if I am checking it, I want to
 install directly from there". The button beside the update status follows the state: **Check now** → **Update now**
-→ download percentage → **Restart mouse-rs**; after a failed install, **Try again**. The main-window banner stays.
+→ download percentage → **Restart Dyavon**; after a failed install, **Try again**. The main-window banner stays.
 
 ### R38 addendum — the code boxes behave like boxes (agreed 2026-10-30)
 Owner: no blinking cursor showed which box was being typed in, and one wrong digit could not be fixed on its own. Each
@@ -394,7 +394,7 @@ pasted into any box fills the boxes from there.
 ### R45 — reconnect to the computer you were last with; switch with one click (agreed 2026-10-30)
 Owner: like Wi-Fi or Bluetooth, "it prioritized the device last it is connected to… I just want to conveniently change
 it to VM, I just click on it or connect". And: "automatic" is about **finding** a computer, not choosing one — when both
-computers move from the router to a phone hotspot, mouse-rs finds the same computer at its new address by itself. "It
+computers move from the router to a phone hotspot, Dyavon finds the same computer at its new address by itself. "It
 doesn't automatically decide who to connect."
 - **Each computer remembers the paired computer it was last with**, and reconnects only to that one: after a restart, a
   network drop or a network change. It never picks some other paired computer because that one answered first.
@@ -440,5 +440,13 @@ update check time gets decreased… on our testing device… the checking will b
   when it comes into use. A computer that connects later is not handed an old copy.
   *Not yet:* files or a large image copied on one controlled computer do not reach another controlled computer.
 - **Connection page:** no Recent clipboard list. The Clipboard tab has the history.
-- **Update checks:** a release build checks once, when mouse-rs starts. A test build (one pointed at a local release
+- **Update checks:** a release build checks once, when Dyavon starts. A test build (one pointed at a local release
   server) also checks every minute.
+
+### R48 — the product is called Dyavon (19 Nov 2026)
+Owner: "Dyavon … your cursor knows no border … make sure in the github file … you are representing its hidden meaning".
+- **Name:** Dyavon. **Slogan:** *Your cursor knows no border.* **Say it** *DAY-uh-von*; **D1** for short.
+- **Meaning, shown in the README:** Greek *dyás* "a pair" + Celtic *avon* (Welsh *afon*) "river": two machines joined by one stream of input.
+- On screen it is always **Dyavon** (window title, header, tray, notifications, About, messages). Files, commands, folders and environment variables are lowercase: `dyavon`, `dyavon.exe`, `~/.dyavon`, `DYAVON_*`.
+- A machine set up as mouse-rs keeps its settings, pairings and clipboard history on first start, and its start-at-login entry is swapped, never doubled. `~/.mouse_share` is left as it was.
+- Chosen because nothing else used the name on 19 Nov 2026: crates.io, npm, PyPI, GitHub, the .com, web search.

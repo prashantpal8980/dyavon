@@ -33,7 +33,7 @@ Done and signed off on hardware:
 
 Code for items 1–5 depends on these. A suggested answer is given for each; "yes to all" is fine.
 
-1. **When is the connection PIN asked for?** Suggested: on the first connection after mouse-rs starts,
+1. **When is the connection PIN asked for?** Suggested: on the first connection after Dyavon starts,
    and for any new device, but **not** on an automatic reconnect after a Wi-Fi drop or sleep.
    Asking on every drop would be the "annoying" case the owner wants to avoid.
 2. **Wrong PIN:** suggested 5 tries, then a 5-minute wait, doubling each time. A 4-digit PIN is only
@@ -131,8 +131,8 @@ Code for items 1–5 depends on these. A suggested answer is given for each; "ye
 **Sun 1 status (Claude):**
 - Owner decisions today:
   - The source goes **public under Apache-2.0**.
-  - Releases live on the source repo itself (`prashantpal8980/mouse-rs`), whose Releases page the README links to. This replaces a separate downloads repo.
-  - The product name stays **mouse-rs** for 1.0.0. GitHub redirects a renamed repo, so a later rename keeps the update link working.
+  - Releases live on the source repo itself (`prashantpal8980/dyavon`), whose Releases page the README links to. This replaces a separate downloads repo.
+  - The product name stays **Dyavon** for 1.0.0. GitHub redirects a renamed repo, so a later rename keeps the update link working.
   - Windows code signing: apply to SignPath Foundation (free) after launch (docs/CODE-SIGNING.md).
 - Security audit fixes B65–B75 are in, each with a test. B72 ("Start at login as administrator" → Program Files copy) needs the owner's Windows check: `irm http://192.168.137.2:8000/b72.txt | iex`.
 - B61 fixed. B59 (cosmetic) and B60 and B9 (by design) move to v1.1.

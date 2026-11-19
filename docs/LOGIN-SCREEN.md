@@ -1,6 +1,6 @@
 # Sharing input at the Linux login screen
 
-Autostart runs mouse-rs when the desktop session starts, which is *after* the display
+Autostart runs Dyavon when the desktop session starts, which is *after* the display
 manager has taken a password. That is why logging in needed a second keyboard plugged
 into the machine — the one moment the shared keyboard was unavailable was the moment it
 was most wanted.
@@ -15,7 +15,7 @@ and an auth cookie. At the greeter:
 * the user's X server does not exist yet, and
 * the greeter's own belongs to a different account (`sddm`) with its own cookie.
 
-There is nothing for mouse-rs to inject into, and no amount of autostart timing changes
+There is nothing for Dyavon to inject into, and no amount of autostart timing changes
 that. The fix has to go underneath the session rather than earlier in it.
 
 ## What it does instead
@@ -40,7 +40,7 @@ Two things, both inherent rather than incidental:
 
 * **Privilege.** `/dev/uinput` is `root:root 0600` on a stock system. Creating a virtual
   input device is exactly the capability a keylogger wants, so there is no unprivileged
-  path to it — the service runs as root, hardened down to the network, `/etc/mouse-rs`,
+  path to it — the service runs as root, hardened down to the network, `/etc/dyavon`,
   its own state directory and that one device.
 * **It is a network-driven keystroke injector running before anyone has logged in.** A
   peer holding `shared_secret` can type at the login prompt. That is the feature, not a
@@ -62,7 +62,7 @@ appears twice.
 
 Setting up a system service needs administrator rights, which the panel does not have —
 so it asks `pkexec` to do it, and your desktop's own authentication agent prompts for the
-password. That password goes to polkit, never through mouse-rs.
+password. That password goes to polkit, never through dyavon.
 
 The toggle reads its state back from systemd rather than from a saved setting, so it also
 reflects a change made with `systemctl` outside the app, and it does **not** move if the
@@ -76,7 +76,7 @@ is *stopped* for as long as you are logged in. That is the hand-over working, no
 **From a terminal**, if you prefer, or if `pkexec` is unavailable:
 
 ```bash
-mouse-rs greeter-status      # what it is currently doing; needs no privilege
+dyavon greeter-status      # what it is currently doing; needs no privilege
 ```
 
 The machine that receives input is the one that needs this — here, the Kali desktop.
@@ -84,31 +84,31 @@ Pair the two machines normally first, so a shared secret exists.
 
 ```bash
 # 1. Prove the virtual devices work, before trusting them somewhere with no terminal.
-#    Focus a text editor when it asks; it types `mouse-rs ok`.
-sudo ./target/release/mouse-rs greeter-selftest
+#    Focus a text editor when it asks; it types `dyavon ok`.
+sudo ./target/release/dyavon greeter-selftest
 
 # 2. Install. Copies the binary to /usr/local/bin, writes a root-only config from
 #    yours, installs the unit and enables it.
-sudo ./target/release/mouse-rs greeter-install
+sudo ./target/release/dyavon greeter-install
 
 # 3. Start it now rather than waiting for a reboot.
-sudo systemctl start mouse-rs-greeter
+sudo systemctl start dyavon-greeter
 ```
 
 Then log out. The login screen should accept the peer's keyboard.
 
 ```bash
-systemctl status mouse-rs-greeter
-journalctl -u mouse-rs-greeter -n 50
+systemctl status dyavon-greeter
+journalctl -u dyavon-greeter -n 50
 ```
 
-The service's own log goes to `/var/lib/mouse-rs/.mouse_share/mouse-rs.log` and is
+The service's own log goes to `/var/lib/dyavon/.dyavon/dyavon.log` and is
 shipped like any other, so it can be read from the other machine.
 
 To remove everything it installed:
 
 ```bash
-sudo mouse-rs greeter-uninstall
+sudo dyavon greeter-uninstall
 ```
 
 ## The hand-over
@@ -125,7 +125,7 @@ the service stop the instant it started, which looks exactly like the feature no
 
 ## Re-run after changing settings
 
-The config in `/etc/mouse-rs/config.json` is a **copy**. It does not follow later edits
+The config in `/etc/dyavon/config.json` is a **copy**. It does not follow later edits
 to your own — so after changing the shared secret or the peer's address, re-run
 `greeter-install`.
 

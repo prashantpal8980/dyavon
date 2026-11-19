@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Package mouse-rs into distributable artifacts:
-#   dist/mouse-rs-<ver>-windows-x86_64.zip   (GUI exe; also runs server/client)
-#   dist/mouse-rs-<ver>-linux-x86_64.tar.gz  (GUI + slim headless + bundled libxdo)
+# Package dyavon into distributable artifacts:
+#   dist/dyavon-<ver>-windows-x86_64.zip   (GUI exe; also runs server/client)
+#   dist/dyavon-<ver>-linux-x86_64.tar.gz  (GUI + slim headless + bundled libxdo)
 #   dist/SHA256SUMS
 #
 # Run from anywhere; paths resolve to the repo root. Builds release for both the
@@ -23,7 +23,7 @@ VER="$(grep -m1 '^version' Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')"
 DIST="$REPO_ROOT/dist"
 STAGE="$REPO_ROOT/target/dist-staging"
 
-echo "==> packaging mouse-rs v$VER"
+echo "==> packaging dyavon v$VER"
 rm -rf "$DIST" "$STAGE"
 mkdir -p "$DIST" "$STAGE"
 
@@ -42,27 +42,27 @@ else
 fi
 
 # --- build everything ---
-# The two host variants share target/release/mouse-rs, so build each then immediately
+# The two host variants share target/release/dyavon, so build each then immediately
 # copy it to its own staged name before the next build overwrites it.
 echo "==> building Linux headless (release, --no-default-features)"
 cargo build --release -p mouse --no-default-features
-HEADLESS_LINUX="$STAGE/mouse-rs-headless"
-cp target/release/mouse-rs "$HEADLESS_LINUX"
+HEADLESS_LINUX="$STAGE/dyavon-headless"
+cp target/release/dyavon "$HEADLESS_LINUX"
 
 echo "==> building Linux GUI (release)"
 RUSTFLAGS="$RUSTFLAGS_GUI" cargo build --release -p mouse
-cp target/release/mouse-rs "$STAGE/mouse-rs"
+cp target/release/dyavon "$STAGE/dyavon"
 
 echo "==> building Windows GUI (release)"
 cargo build --release -p mouse --target "$WIN_TARGET"
-cp "target/$WIN_TARGET/release/mouse-rs.exe" "$STAGE/mouse-rs.exe"
+cp "target/$WIN_TARGET/release/dyavon.exe" "$STAGE/dyavon.exe"
 
 # ---------------- Linux tarball ----------------
 echo "==> staging Linux tarball"
-LX="$STAGE/mouse-rs-$VER-linux-x86_64"
+LX="$STAGE/dyavon-$VER-linux-x86_64"
 mkdir -p "$LX/lib"
-cp "$STAGE/mouse-rs" "$LX/mouse-rs"
-cp "$HEADLESS_LINUX" "$LX/mouse-rs-headless"
+cp "$STAGE/dyavon" "$LX/dyavon"
+cp "$HEADLESS_LINUX" "$LX/dyavon-headless"
 cp config.example.json "$LX/config.example.json"
 [ -n "$LIBXDO" ] && cp -L "$LIBXDO" "$LX/lib/libxdo.so.3"
 
@@ -72,66 +72,66 @@ cat > "$LX/run-gui.sh" <<'EOF'
 # gtk3 + libayatana-appindicator are still required from the system (see README).
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export LD_LIBRARY_PATH="$DIR/lib:${LD_LIBRARY_PATH:-}"
-exec "$DIR/mouse-rs" "$@"
+exec "$DIR/dyavon" "$@"
 EOF
-chmod +x "$LX/run-gui.sh" "$LX/mouse-rs" "$LX/mouse-rs-headless"
+chmod +x "$LX/run-gui.sh" "$LX/dyavon" "$LX/dyavon-headless"
 
 cat > "$LX/README.txt" <<EOF
-mouse-rs v$VER — Linux (x86_64)
+dyavon v$VER — Linux (x86_64)
 
 Share one keyboard/mouse between this machine and another over the LAN.
 Requires an X11 session (not Wayland) on Linux.
 
 WHAT'S HERE
-  mouse-rs-headless   Slim, fully self-contained binary (no GUI). RECOMMENDED for a
+  dyavon-headless   Slim, fully self-contained binary (no GUI). RECOMMENDED for a
                       dedicated server/client. No extra packages needed.
-  mouse-rs            The same tool plus the iced control panel + system tray.
-  run-gui.sh          Launches mouse-rs with the bundled libxdo on LD_LIBRARY_PATH.
+  dyavon            The same tool plus the iced control panel + system tray.
+  run-gui.sh          Launches dyavon with the bundled libxdo on LD_LIBRARY_PATH.
   lib/libxdo.so.3     Bundled (only the GUI needs it).
   config.example.json Sample config.
 
 QUICK START (headless)
   1. Copy the sample config and edit it:
-       mkdir -p ~/.mouse_share
-       cp config.example.json ~/.mouse_share/config.json
-       \$EDITOR ~/.mouse_share/config.json
+       mkdir -p ~/.dyavon
+       cp config.example.json ~/.dyavon/config.json
+       \$EDITOR ~/.dyavon/config.json
      Set a long 'shared_secret' (IDENTICAL on both machines), the role, and on the
      client set 'server_host' to the server's LAN IP.
-  2. On the machine with the keyboard/mouse:   ./mouse-rs-headless server
-     On the other machine:                     ./mouse-rs-headless client
+  2. On the machine with the keyboard/mouse:   ./dyavon-headless server
+     On the other machine:                     ./dyavon-headless client
 
 GUI
   ./run-gui.sh          (uses the bundled libxdo)
   It still needs gtk3 + the appindicator tray library from your distro:
        sudo apt install libgtk-3-0 libayatana-appindicator3-1
-  (Or install libxdo3 too and just run ./mouse-rs directly.)
+  (Or install libxdo3 too and just run ./dyavon directly.)
 
 Move the mouse to the configured edge to cross to the other screen. Press the
 return hotkey (default Scroll Lock, or the 'return_hotkey' combo) to come back.
 EOF
 
-tar -C "$STAGE" -czf "$DIST/mouse-rs-$VER-linux-x86_64.tar.gz" "mouse-rs-$VER-linux-x86_64"
+tar -C "$STAGE" -czf "$DIST/dyavon-$VER-linux-x86_64.tar.gz" "dyavon-$VER-linux-x86_64"
 
 # ---------------- Windows zip ----------------
 echo "==> staging Windows zip"
-WX="$STAGE/mouse-rs-$VER-windows-x86_64"
+WX="$STAGE/dyavon-$VER-windows-x86_64"
 mkdir -p "$WX"
-cp "$STAGE/mouse-rs.exe" "$WX/mouse-rs.exe"
+cp "$STAGE/dyavon.exe" "$WX/dyavon.exe"
 cp config.example.json "$WX/config.example.json"
 
 cat > "$WX/README.txt" <<EOF
-mouse-rs v$VER — Windows (x86_64)
+dyavon v$VER — Windows (x86_64)
 
 Share one keyboard/mouse between this machine and another over the LAN.
-mouse-rs.exe is self-contained (only standard Win32 DLLs).
+dyavon.exe is self-contained (only standard Win32 DLLs).
 
 RUN
-  Double-click mouse-rs.exe to open the control panel (edit config, Start/Stop).
+  Double-click dyavon.exe to open the control panel (edit config, Start/Stop).
   Or from a terminal (PowerShell / cmd):
-       mouse-rs.exe server      (this machine has the keyboard/mouse)
-       mouse-rs.exe client      (this machine receives input)
+       dyavon.exe server      (this machine has the keyboard/mouse)
+       dyavon.exe client      (this machine receives input)
 
-CONFIG  %USERPROFILE%\\.mouse_share\\config.json
+CONFIG  %USERPROFILE%\\.dyavon\\config.json
   Copy config.example.json there and edit it. Set a long 'shared_secret' that is
   IDENTICAL on both machines; on the client set 'server_host' to the server's LAN IP.
   'return_hotkey' (e.g. ctrl+win+alt+esc) hands control back; it is matched on the
@@ -143,10 +143,10 @@ NOTES
 EOF
 
 if command -v zip >/dev/null 2>&1; then
-  ( cd "$STAGE" && zip -qr "$DIST/mouse-rs-$VER-windows-x86_64.zip" "mouse-rs-$VER-windows-x86_64" )
+  ( cd "$STAGE" && zip -qr "$DIST/dyavon-$VER-windows-x86_64.zip" "dyavon-$VER-windows-x86_64" )
 else
   ( cd "$STAGE" && python3 -c "import shutil,sys; shutil.make_archive(sys.argv[1],'zip','.',sys.argv[2])" \
-      "$DIST/mouse-rs-$VER-windows-x86_64" "mouse-rs-$VER-windows-x86_64" )
+      "$DIST/dyavon-$VER-windows-x86_64" "dyavon-$VER-windows-x86_64" )
 fi
 
 # ---------------- checksums ----------------

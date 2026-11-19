@@ -4,6 +4,21 @@ Dates are when the work was committed. Item codes refer to
 [docs/KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md) (B…) and
 [docs/UI-REQUIREMENTS.md](docs/UI-REQUIREMENTS.md) (R…).
 
+## Unreleased
+
+- **Renamed to Dyavon** (say *DAY-uh-von*). *Your cursor knows no border.* The program is
+  now `dyavon` / `dyavon.exe`, settings live in `~/.dyavon` (`%USERPROFILE%\.dyavon`), and
+  environment variables start `DYAVON_`. A machine set up as mouse-rs copies its settings,
+  pairings and clipboard history across on first start and swaps its start-at-login entry;
+  `~/.mouse_share` is left as it was. Dyavon and mouse-rs builds do not connect to each
+  other, so update both computers together. One-time helpers:
+  `scripts/linux-rename.sh` and `scripts/windows-rename.ps1`.
+- **B76: "Cable first" now really prefers the cable.** The server says which of its
+  addresses are on Wi-Fi, so a client that reaches the laptop's Wi-Fi through its own
+  Ethernet port no longer counts that path as cable.
+- The in-app update check now looks at this repository's releases (it pointed at a
+  separate downloads repository that was never created).
+
 ## 1.0.0 — 2026-11-01 (first public release)
 
 - **Open source** under the Apache License 2.0. Release packages carry `LICENSE`, `NOTICE`

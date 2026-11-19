@@ -97,7 +97,7 @@ const S = [
   ["c6","5 + 6 + checksums from mint","Ctrl+click the three files → copy → Kali's from-mint window → Ctrl+V. Then on Kali: <code>cd ~/mouse/test-files/from-mint && sha256sum -c checksums*mint*</code> → both <b>OK</b>."],
  ]],
  ["D. Connection troubles", [
-  ["d1","Mint's app closed and opened again","On Mint: quit mouse-rs (tray icon → Quit), start it again. It reconnects by itself, without pairing again."],
+  ["d1","Mint's app closed and opened again","On Mint: quit Dyavon (tray icon → Quit), start it again. It reconnects by itself, without pairing again."],
   ["d2","Kali's app restarted","On Kali: Restart. Mint reconnects by itself."],
   ["d3","Network cut","In virt-manager, Mint → ⓘ → NIC → untick <i>Link state: active</i> → Apply. Kali shows disconnected within a few seconds and the pointer is NOT stuck on Mint. Tick it again: it reconnects."],
   ["d4","Crossing while a menu is open","Open a right-click menu on Kali, then push to the edge. Either it crosses or it stays put. Nothing freezes."],
@@ -120,7 +120,7 @@ const S = [
   ["w6","Try 2: if try 1 did nothing","Type <code>reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE /v BypassNRO /t REG_DWORD /d 1 /f</code> → Enter, then <code>shutdown /r /t 0</code> → Enter. After the restart, redo country + keyboard; on the network screen click <b>I don't have internet</b> → <b>Continue with limited setup</b>. If neither try works, tell Claude: the fallback is signing in with a Microsoft account."],
   ["w7","Name and password","Name: <code>tester</code>. Password: <code>test123</code> (needed later for the lock-screen test). Three security questions: any answers."],
   ["w8","Privacy screens","Turn every switch <b>off</b> → Accept / Next until the desktop appears."],
-  ["w9","Plug the network back in","Tell Claude \"Windows desktop is up\": Claude plugs the cables back in and gives you the one line that installs mouse-rs."],
+  ["w9","Plug the network back in","Tell Claude \"Windows desktop is up\": Claude plugs the cables back in and gives you the one line that installs dyavon."],
  ]],
  ["F. Windows ↔ Windows: laptop shares its mouse, the VM is controlled", [
   ["f1","Both on the newest version","Laptop: ⋯ → About shows the newest test version. VM: <code>irm 192.168.122.1:8002/w.txt | iex</code> in PowerShell."],
@@ -141,13 +141,13 @@ const S = [
   ["f14c","Use button and the edge","Laptop: click <b>Use</b> on kali-desktop, then push off the laptop's edge: you land on Kali. Click Use on win-vm: the edge now leads to the VM."],
   ["f14d","Order and your own shortcut","Laptop: ▲▼ move win-vm to number 2 → Restart sharing → Ctrl+Alt+Shift+2 now goes to the VM. Settings → Keyboard &amp; hotkeys → Switch between computers → Change the laptop's to Ctrl+Shift+Alt+9 → Restart → it brings you home."],
   ["f14e","Copy between all three","Copy text on Kali, Ctrl+Alt+Shift+3, paste in the VM. Copy a file on the VM, Ctrl+Alt+Shift+1, paste on the laptop."],
-  ["f14f","One goes away","Shut Kali's mouse-rs while on the VM: you stay on the VM; Kali shows not connected. Start it again: it comes back by itself."],
+  ["f14f","One goes away","Shut Kali's Dyavon while on the VM: you stay on the VM; Kali shows not connected. Start it again: it comes back by itself."],
   ["f15","The B50 check","With the VM paired only with the laptop: Kali must never connect to the VM. Claude reads Kali's log for the refusals."],
   ["f16","Clean up","Delete <code>%USERPROFILE%\\mouse-test</code> on both."],
  ]],
 ];
 
-const KEY = "mouse-rs-sameos-checklist-v1";
+const KEY = "dyavon-sameos-checklist-v1";
 let st = {};
 try { st = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { st = {}; }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };

@@ -4,7 +4,7 @@
 
 | Document | What it covers |
 |---|---|
-| [../README.md](../README.md) | What mouse-rs is, building, configuring, running |
+| [../README.md](../README.md) | What Dyavon is, building, configuring, running |
 | [KNOWN-ISSUES.md](KNOWN-ISSUES.md) | The standing bug list (B1…), with evidence and state |
 | [UI-REQUIREMENTS.md](UI-REQUIREMENTS.md) | Agreed behaviour of the control panel (R1…) |
 | [STATUS.md](STATUS.md) | Longer project history and phase status |

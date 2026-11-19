@@ -20,7 +20,7 @@ pkgs = [p for p in meta["packages"] if p["id"] not in members and (nodes is None
 pkgs.sort(key=lambda p: (p["name"], p["version"]))
 missing = []
 with open(out, "w", encoding="utf-8") as f:
-    f.write("Third-party software in mouse-rs\n" + "=" * 32 + "\n\n")
+    f.write("Third-party software in dyavon\n" + "=" * 32 + "\n\n")
     f.write(f"{len(pkgs)} crates. Each is listed with its licence, followed by the licence\n"
             "texts it ships.\n\n")
     for p in pkgs:

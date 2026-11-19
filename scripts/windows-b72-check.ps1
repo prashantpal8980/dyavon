@@ -2,7 +2,7 @@
 # ordinary (non-administrator) program cannot replace.
 #
 # Run in a NORMAL PowerShell window (not "Run as administrator"), after turning the
-# option on in mouse-rs (Settings > Startup), and again after logging out and back in:
+# option on in dyavon (Settings > Startup), and again after logging out and back in:
 #
 #   irm http://192.168.137.2:8000/b72.txt | iex
 #
@@ -31,15 +31,15 @@ if ($me.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
 }
 
 $pf     = [Environment]::GetFolderPath('ProgramFiles')
-$dir    = Join-Path $pf 'mouse-rs'
-$target = Join-Path $dir 'mouse-rs.exe'
+$dir    = Join-Path $pf 'dyavon'
+$target = Join-Path $dir 'dyavon.exe'
 Say "expected task target: $target"
 
 # 1. The task exists and starts the Program Files copy, with highest privileges.
 $task = $null
-try { $task = Get-ScheduledTask -TaskName 'mouse-rs (elevated)' -ErrorAction Stop } catch {}
+try { $task = Get-ScheduledTask -TaskName 'dyavon (elevated)' -ErrorAction Stop } catch {}
 if (-not $task) {
-    Bad 'no task "mouse-rs (elevated)": turn on Start at login as administrator first'
+    Bad 'no task "dyavon (elevated)": turn on Start at login as administrator first'
 } else {
     $exec = ($task.Actions | Select-Object -First 1).Execute.Trim('"')
     Say "task starts: $exec"
@@ -71,9 +71,9 @@ if (Test-Path $dir) {
     }
     $renamed = $false
     if (Test-Path $target) {
-        try { Rename-Item $target 'mouse-rs.exe.b72test' -ErrorAction Stop; $renamed = $true } catch {}
+        try { Rename-Item $target 'dyavon.exe.b72test' -ErrorAction Stop; $renamed = $true } catch {}
         if ($renamed) {
-            Rename-Item (Join-Path $dir 'mouse-rs.exe.b72test') 'mouse-rs.exe' -ErrorAction SilentlyContinue
+            Rename-Item (Join-Path $dir 'dyavon.exe.b72test') 'dyavon.exe' -ErrorAction SilentlyContinue
             Bad 'an ordinary program COULD rename the copy (renamed back)'
         } else {
             Pass 'an ordinary program cannot rename or replace the copy'
@@ -84,12 +84,12 @@ if (Test-Path $dir) {
 }
 
 # 4. The firewall rule for the copy (read-only query).
-$fw = netsh advfirewall firewall show rule name="mouse-rs (elevated)" 2>$null
+$fw = netsh advfirewall firewall show rule name="dyavon (elevated)" 2>$null
 if ($LASTEXITCODE -eq 0 -and ($fw -match [regex]::Escape($target))) { Pass 'firewall rule for the copy exists' }
-else { Say 'NOTE  no firewall rule "mouse-rs (elevated)" naming the copy (only matters when this PC has the mouse)' }
+else { Say 'NOTE  no firewall rule "dyavon (elevated)" naming the copy (only matters when this PC has the mouse)' }
 
 # 5. After a logout/login: which copy is running.
-$procs = Get-Process mouse-rs -ErrorAction SilentlyContinue
+$procs = Get-Process dyavon -ErrorAction SilentlyContinue
 if ($procs) {
     foreach ($p in $procs) {
         $path = $null
@@ -98,7 +98,7 @@ if ($procs) {
         Say "running: pid $($p.Id)  $path"
     }
 } else {
-    Say 'NOTE  mouse-rs is not running right now'
+    Say 'NOTE  dyavon is not running right now'
 }
 
 $result = if ($fails -eq 0) { 'ok' } else { 'FAILED' }

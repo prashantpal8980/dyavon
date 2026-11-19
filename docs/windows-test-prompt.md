@@ -1,4 +1,4 @@
-You are helping me test **mouse-rs**, a Rust KVM-switch (share one keyboard/mouse across two
+You are helping me test **Dyavon**, a Rust KVM-switch (share one keyboard/mouse across two
 machines). It is developed on my Kali desktop; this Windows laptop is the other end. Work in
 PowerShell. Do not modify any source — this laptop only runs and tests the built binary.
 
@@ -11,7 +11,7 @@ PowerShell. Do not modify any source — this laptop only runs and tests the bui
   Kali side is already running its panel with auto-connect on, so it is **retrying the
   connection right now** and should link up by itself the moment this side starts.
 
-> **Why you may have never seen a UI on this laptop:** the `mouse-rs.exe` currently here is
+> **Why you may have never seen a UI on this laptop:** the `dyavon.exe` currently here is
 > an old build from before the GUI existed, when a bare launch just printed
 > `no subcommand (GUI lands in Phase 6)` and exited. Today's build has the full panel and
 > system tray on Windows. Getting it is step 1.
@@ -21,8 +21,8 @@ PowerShell. Do not modify any source — this laptop only runs and tests the bui
 A fresh Windows build is being served from the Kali box:
 
 ```powershell
-mkdir $HOME\mouse-rs -Force
-Invoke-WebRequest -Uri http://192.168.137.2:8000/mouse-rs.exe -OutFile $HOME\mouse-rs\mouse-rs.exe
+mkdir $HOME\dyavon -Force
+Invoke-WebRequest -Uri http://192.168.137.2:8000/dyavon.exe -OutFile $HOME\dyavon\dyavon.exe
 ```
 
 Verify the download — it must match exactly:
@@ -31,20 +31,20 @@ Verify the download — it must match exactly:
 - SHA256: `A99042C54CEDC868BF4329F4A5E4645746E994D780345F1B92005E7D67E143D5`
 
 ```powershell
-Get-FileHash $HOME\mouse-rs\mouse-rs.exe -Algorithm SHA256
+Get-FileHash $HOME\dyavon\dyavon.exe -Algorithm SHA256
 ```
 
 If the download fails or the hash differs, **stop and tell me** — the HTTP server on Kali may
-have been shut down and I'll restart it. Do not fall back to an older `mouse-rs.exe` already
+have been shut down and I'll restart it. Do not fall back to an older `dyavon.exe` already
 on this machine; the whole point is testing today's build.
 
-Also: there may be an older mouse-rs.exe and an old Python `mouse_share` on this laptop from
+Also: there may be an older dyavon.exe and an old Python `mouse_share` on this laptop from
 previous sessions. Find them, tell me where they are, and **don't run them**. If either
 starts at login, say so — the Python one is superseded and should be disabled.
 
 ## Step 2 — check the config, do NOT overwrite it
 
-Config lives at `%USERPROFILE%\.mouse_share\config.json`. It already exists and **worked in a
+Config lives at `%USERPROFILE%\.dyavon\config.json`. It already exists and **worked in a
 previous session**, so treat it as precious. Read it and report:
 
 - `role` (must be `server`), `listen_port` (24800)
@@ -63,8 +63,8 @@ Change nothing yet. Report what you found and wait for my go-ahead if anything l
 **A bare launch with no subcommand opens the control panel.** That is what I want here:
 
 ```powershell
-cd $HOME\mouse-rs
-.\mouse-rs.exe
+cd $HOME\dyavon
+.\dyavon.exe
 ```
 
 - **Windows SmartScreen may block it** — "More info" → "Run anyway". It's an unsigned
@@ -77,14 +77,14 @@ panel doesn't drag a console window behind it. That's expected. Instead, this bu
 log file next to the config:
 
 ```powershell
-Get-Content $env:USERPROFILE\.mouse_share\mouse-rs.log -Tail 30
+Get-Content $env:USERPROFILE\.dyavon\dyavon.log -Tail 30
 ```
 
 The panel also shows that path under **Connection → Log file**. Both `Startup` and
 `Log file` live at the **bottom of the Connection tab**, below `Listen port` — you must
 scroll that pane to see them. There is no "General" tab. Check the file exists and has
-content — the first line should be `logging to …\mouse-rs.log`, and you should see
-`starting mouse-rs for …` when you press Start. **If the file is missing or empty, tell me:
+content — the first line should be `logging to …\dyavon.log`, and you should see
+`starting dyavon for …` when you press Start. **If the file is missing or empty, tell me:
 that's a real bug** (this logging path is new today and has never run on Windows). Verify
 the path shown in the panel matches where the file actually is.
 
@@ -125,7 +125,7 @@ want to know today's build didn't regress it.
 ## Step 5 — start-at-login (this is genuinely untested code)
 
 This is the part I most want tested. The build writes a per-user entry to
-`HKCU\Software\Microsoft\Windows\CurrentVersion\Run` under the value name `mouse-rs`. It
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Run` under the value name `dyavon`. It
 compiles and cross-compiles clean but **has never run on Windows**, so expect it to possibly
 fail — that's useful information, not a problem.
 
@@ -135,7 +135,7 @@ fail — that's useful information, not a problem.
 2. Verify the registry entry actually landed:
 
 ```powershell
-Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'mouse-rs'
+Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'dyavon'
 ```
 
 The value must be the **full path to the exe, wrapped in double quotes**. Tell me the exact
@@ -157,27 +157,27 @@ to files and upload them to the Kali box over the cable. There is a receive endp
 
 ```powershell
 # Write the report first.
-$report = "$HOME\mouse-rs\windows-report.md"
+$report = "$HOME\dyavon\windows-report.md"
 # ... write your findings into $report ...
 
 # Then upload it, plus the log and any screenshots.
 Invoke-WebRequest -Uri http://192.168.137.2:8001/windows-report.md -Method PUT -InFile $report
-Invoke-WebRequest -Uri http://192.168.137.2:8001/mouse-rs.log     -Method PUT -InFile $env:USERPROFILE\.mouse_share\mouse-rs.log
+Invoke-WebRequest -Uri http://192.168.137.2:8001/dyavon.log     -Method PUT -InFile $env:USERPROFILE\.dyavon\dyavon.log
 # Screenshots are welcome — PNG uploads the same way and I can view them:
-Invoke-WebRequest -Uri http://192.168.137.2:8001/panel.png -Method PUT -InFile $HOME\mouse-rs\panel.png
+Invoke-WebRequest -Uri http://192.168.137.2:8001/panel.png -Method PUT -InFile $HOME\dyavon\panel.png
 ```
 
 Each upload replies `saved <name> (<n> bytes)`. `Invoke-WebRequest http://192.168.137.2:8001/`
 lists what has arrived, so you can confirm before finishing. If a PUT fails, tell me the
 error — the endpoint may have been stopped — and don't fall back to pasting.
 
-Filenames: use plain names like `windows-report.md`, `mouse-rs.log`, `panel-general.png`.
+Filenames: use plain names like `windows-report.md`, `dyavon.log`, `panel-general.png`.
 Don't worry about overwriting; just tell me what you uploaded.
 
 Put this in the report, in full detail — long is fine now that it's a file, not chat:
 
 1. Whether the Kali client connected unattended, and what the panel's status showed
-2. Whether `%USERPROFILE%\.mouse_share\mouse-rs.log` exists with sensible content, and
+2. Whether `%USERPROFILE%\.dyavon\dyavon.log` exists with sensible content, and
    whether the path shown in the panel matches it
 3. Anything that errored, hung, rendered wrong, or looked ugly — **verbatim**, don't
    summarize away detail; include full error text and any stack traces

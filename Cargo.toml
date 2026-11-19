@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/mouse-core", "crates/mouse-input", "crates/mouse-engine", "crates/mouse-clipboard", "crates/mouse"]
+members = ["crates/dyavon-core", "crates/dyavon-input", "crates/dyavon-engine", "crates/dyavon-clipboard", "crates/dyavon"]
 
 [workspace.package]
 version = "0.1.0"
@@ -8,7 +8,7 @@ edition = "2021"
 rust-version = "1.80"
 license = "Apache-2.0"
 publish = false
-repository = "https://github.com/prashantpal8980/mouse-rs"
+repository = "https://github.com/prashantpal8980/dyavon"
 authors = ["Prashant Pal"]
 
 [workspace.dependencies]

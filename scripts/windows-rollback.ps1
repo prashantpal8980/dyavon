@@ -1,4 +1,4 @@
-# mouse-rs rollback to the 2026-09-04 build (the one that ran for five weeks).
+# dyavon rollback to the 2026-09-04 build (the one that ran for five weeks).
 # Served from the Kali box; run it with one line, from an ADMINISTRATOR PowerShell:
 #   iex (iwr http://192.168.137.2:8000/rollback.ps1 -UseBasicParsing).Content
 #
@@ -7,21 +7,21 @@
 
 $ErrorActionPreference = 'Stop'
 
-$dir  = Join-Path $env:USERPROFILE 'mouse-rs'
-$exe  = Join-Path $dir 'mouse-rs.exe'
-$new  = Join-Path $dir 'mouse-rs.exe.new'
-$bak  = Join-Path $dir 'mouse-rs.exe.bak'
-$url  = 'http://192.168.137.2:8000/mouse-rs.exe'
+$dir  = Join-Path $env:USERPROFILE 'dyavon'
+$exe  = Join-Path $dir 'dyavon.exe'
+$new  = Join-Path $dir 'dyavon.exe.new'
+$bak  = Join-Path $dir 'dyavon.exe.bak'
+$url  = 'http://192.168.137.2:8000/dyavon.exe'
 $want = '5076363C55AA0E7B16CE43AD11BDDCC4B3BFE42DDC9EBFE13003CBE54F9011F1'
 $size = 12080128
 
 function Say($m) { Write-Host "  $m" }
 
 Write-Host ''
-Write-Host 'mouse-rs rollback -> 2026-09-04 build' -ForegroundColor Cyan
+Write-Host 'dyavon rollback -> 2026-09-04 build' -ForegroundColor Cyan
 
 # --- 0. elevation, checked up front -----------------------------------------
-# mouse-rs is running elevated, so a normal shell can neither stop it nor replace
+# dyavon is running elevated, so a normal shell can neither stop it nor replace
 # the file it holds open. Checked here so it fails before anything is touched.
 $me = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
 if (-not $me.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -34,19 +34,19 @@ if (-not $me.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
 }
 Say 'shell is elevated: yes'
 
-if (-not (Test-Path $dir)) { throw "no mouse-rs folder at $dir" }
+if (-not (Test-Path $dir)) { throw "no dyavon folder at $dir" }
 
 # --- 1. stop it, and prove it stopped ---------------------------------------
-$p = Get-Process mouse-rs -ErrorAction SilentlyContinue
+$p = Get-Process dyavon -ErrorAction SilentlyContinue
 if ($p) {
-    Say "stopping mouse-rs (pid $($p.Id -join ', '))"
+    Say "stopping dyavon (pid $($p.Id -join ', '))"
     $p | Stop-Process -Force
     Start-Sleep -Seconds 2
 } else {
-    Say 'mouse-rs was not running'
+    Say 'dyavon was not running'
 }
-if (Get-Process mouse-rs -ErrorAction SilentlyContinue) {
-    throw 'mouse-rs is STILL running, so its exe cannot be replaced. Nothing changed.'
+if (Get-Process dyavon -ErrorAction SilentlyContinue) {
+    throw 'dyavon is STILL running, so its exe cannot be replaced. Nothing changed.'
 }
 Say 'stopped'
 
@@ -69,7 +69,7 @@ Say 'verified against the expected hash'
 
 # --- 3. replace, keeping the build being thrown away ------------------------
 if (Test-Path $bak) { Remove-Item $bak -Force }
-if (Test-Path $exe) { Move-Item $exe $bak -Force; Say 'previous exe kept as mouse-rs.exe.bak' }
+if (Test-Path $exe) { Move-Item $exe $bak -Force; Say 'previous exe kept as dyavon.exe.bak' }
 Move-Item $new $exe -Force
 if ((Get-FileHash $exe -Algorithm SHA256).Hash -ne $want) {
     throw 'the installed file is not the one that was verified.'
@@ -79,10 +79,10 @@ Say 'installed'
 # --- 4. start it; this shell is elevated, so no second UAC prompt -----------
 Start-Process -FilePath $exe
 Start-Sleep -Seconds 8
-$r = Get-Process mouse-rs -ErrorAction SilentlyContinue
+$r = Get-Process dyavon -ErrorAction SilentlyContinue
 if ($r) {
     Write-Host ''
-    Write-Host "DONE - mouse-rs is running elevated (pid $($r.Id -join ', '))" -ForegroundColor Green
+    Write-Host "DONE - dyavon is running elevated (pid $($r.Id -join ', '))" -ForegroundColor Green
     Say 'Now try Ctrl+Space and Alt+Tab across to Kali.'
 } else {
     Write-Host ''

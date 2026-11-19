@@ -1,4 +1,4 @@
-Follow-up to your Windows test report on **mouse-rs** — thank you, it was excellent, and it
+Follow-up to your Windows test report on **Dyavon** — thank you, it was excellent, and it
 found six real defects. All six are fixed. This is a **focused retest of just those fixes**,
 not a full pass. Work in PowerShell, non-elevated, and don't modify any source.
 
@@ -12,8 +12,8 @@ An older build is running here. Stop it first (**tray → Quit**, which you conf
 then:
 
 ```powershell
-Invoke-WebRequest -Uri http://192.168.137.2:8000/mouse-rs.exe -OutFile $HOME\mouse-rs\mouse-rs.exe
-Get-FileHash $HOME\mouse-rs\mouse-rs.exe -Algorithm SHA256
+Invoke-WebRequest -Uri http://192.168.137.2:8000/dyavon.exe -OutFile $HOME\dyavon\dyavon.exe
+Get-FileHash $HOME\dyavon\dyavon.exe -Algorithm SHA256
 ```
 
 Must match exactly — size `13554688` bytes, SHA256
@@ -27,7 +27,7 @@ Note your current state, carried over from last time: **`Start at login` is ON**
 
 | # | Was | Now |
 |---|---|---|
-| 1 | Tray `Open mouse-rs` did nothing | un-minimizes *then* focuses |
+| 1 | Tray `Open dyavon` did nothing | un-minimizes *then* focuses |
 | 2 | `config.json` truncate-rewritten in place | temp file → fsync → atomic rename |
 | 3 | Docs said "General tab" | it's the **Connection** tab (scroll to bottom) |
 | 4 | Log silent on Stop / saves / registry writes | all logged |
@@ -41,7 +41,7 @@ managers restore on activate, so the bug never reproduced there and the fix can'
 there either.
 
 1. Minimize the panel (title-bar minimize, or `ShowWindow(SW_MINIMIZE)` as you did before).
-2. Right-click the tray icon → **Open mouse-rs**.
+2. Right-click the tray icon → **Open Dyavon**.
 3. Report whether the window **restores and comes to the foreground**. Check `IsIconic` and
    the window rect — last time it stayed at `(-32000,-32000)`.
 
@@ -60,11 +60,11 @@ items:
 - while **sharing is running**: `Start` should be greyed, `Stop` active
 - while **stopped**: `Start` active, `Stop` greyed
 
-`Open mouse-rs` and `Quit` should always be active. Last time all four were always enabled.
+`Open dyavon` and `Quit` should always be active. Last time all four were always enabled.
 
 ## Step 3 — fix 4: log coverage
 
-The log is `%USERPROFILE%\.mouse_share\mouse-rs.log`. Exercise Stop, Start, a Save, and the
+The log is `%USERPROFILE%\.dyavon\dyavon.log`. Exercise Stop, Start, a Save, and the
 `Start at login` toggle, then check the log contains lines matching:
 
 - `stop requested from the panel`
@@ -89,7 +89,7 @@ remote, that is a serious regression and I need to know immediately.
 
 `config.json` is now written via a temp file and renamed. Two things to verify:
 
-1. After pressing **Start** and after pressing **Save**, list `%USERPROFILE%\.mouse_share\`
+1. After pressing **Start** and after pressing **Save**, list `%USERPROFILE%\.dyavon\`
    and confirm **no leftover files** like `config.tmp1234` or `config.tmp*`. A stray temp
    would be a second copy of your shared secret on disk.
 2. Confirm `shared_secret` still has the same length and first 4 characters as before
@@ -100,13 +100,13 @@ remote, that is a serious regression and I need to know immediately.
 
 Briefly confirm the things that already worked still do: panel opens and renders, Kali
 connects unattended, `Start at login` registry value is still
-`"C:\Users\prade\mouse-rs\mouse-rs.exe"`, tray Start/Stop/Quit behave, edge crossing works.
+`"C:\Users\prade\dyavon\dyavon.exe"`, tray Start/Stop/Quit behave, edge crossing works.
 Short confirmations are fine — I'm looking for breakage, not fresh detail.
 
 ## Step 7 — one piece of housekeeping (ask me first)
 
 You reported that Python `mouse_share` still starts at login via
-`%APPDATA%\...\Startup\mouse_share.lnk`, and will hook input alongside mouse-rs at next
+`%APPDATA%\...\Startup\mouse_share.lnk`, and will hook input alongside Dyavon at next
 logon. **Ask me before touching it**, then if I agree, move that shortcut somewhere harmless
 (don't delete it) and tell me where you put it.
 
@@ -115,8 +115,8 @@ logon. **Ask me before touching it**, then if I agree, move that shortcut somewh
 Same method as last time — **do not paste the report or logs into chat**:
 
 ```powershell
-Invoke-WebRequest -Uri http://192.168.137.2:8001/retest-report.md -Method PUT -InFile $HOME\mouse-rs\retest-report.md
-Invoke-WebRequest -Uri http://192.168.137.2:8001/retest-mouse-rs.log -Method PUT -InFile $env:USERPROFILE\.mouse_share\mouse-rs.log
+Invoke-WebRequest -Uri http://192.168.137.2:8001/retest-report.md -Method PUT -InFile $HOME\dyavon\retest-report.md
+Invoke-WebRequest -Uri http://192.168.137.2:8001/retest-dyavon.log -Method PUT -InFile $env:USERPROFILE\.dyavon\dyavon.log
 ```
 
 Screenshots welcome (`-Method PUT` any `.png`), especially the tray menu showing greyed items.

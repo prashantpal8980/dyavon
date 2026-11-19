@@ -1,4 +1,4 @@
-# Packaging mouse-rs
+# Packaging Dyavon
 
 `scripts/package.sh` builds release artifacts for both platforms and assembles them
 into `dist/`. Run it from anywhere (paths resolve to the repo root):
@@ -11,13 +11,13 @@ Output:
 
 | Artifact | Contents |
 |---|---|
-| `dist/mouse-rs-<ver>-windows-x86_64.zip` | `mouse-rs.exe` (GUI; also runs `server`/`client`), `config.example.json`, `README.txt` |
-| `dist/mouse-rs-<ver>-linux-x86_64.tar.gz` | `mouse-rs` (GUI), `mouse-rs-headless` (slim), bundled `lib/libxdo.so.3`, `run-gui.sh`, `config.example.json`, `README.txt` |
+| `dist/dyavon-<ver>-windows-x86_64.zip` | `dyavon.exe` (GUI; also runs `server`/`client`), `config.example.json`, `README.txt` |
+| `dist/dyavon-<ver>-linux-x86_64.tar.gz` | `dyavon` (GUI), `dyavon-headless` (slim), bundled `lib/libxdo.so.3`, `run-gui.sh`, `config.example.json`, `README.txt` |
 | `dist/SHA256SUMS` | checksums of both archives |
 
 ## Build variants & runtime deps
 
-- **Slim headless** (`cargo build --release -p mouse --no-default-features`) — no GUI,
+- **Slim headless** (`cargo build --release -p dyavon --no-default-features`) — no GUI,
   no tray. **Fully self-contained**: Linux ≈ 3.3 MB (only libc + libX11/libXtst, which
   any X11 session has); Windows ≈ 2.9 MB. This is the recommended build for a dedicated
   server/client. The `gui` cargo feature is default-on, so `--no-default-features` opts out.
