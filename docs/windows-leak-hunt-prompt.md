@@ -66,8 +66,8 @@ Invoke-WebRequest -Uri http://192.168.137.2:8000/dyavon.exe -OutFile $HOME\dyavo
 Get-FileHash $HOME\dyavon\dyavon.exe -Algorithm SHA256
 ```
 
-Must match exactly — size `13577728` bytes, SHA256
-`6889E7A551BAB473E8C0B3CECBED11CFE6CAF502028761AD5FDE5FD1BC2C504F`.
+Must match exactly — size `13599232` bytes, SHA256
+`082A6796C1AD2CCCAB424D620BBD3CC068975D1107AF16B227526F3BD943C59E`.
 If it doesn't match, stop and tell me.
 
 **Start the log clean** so the trial numbering below lines up with the file — move the old

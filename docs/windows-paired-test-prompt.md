@@ -52,8 +52,8 @@ Invoke-WebRequest -Uri http://192.168.137.2:8000/dyavon.exe -OutFile $HOME\dyavo
 (Get-FileHash $HOME\dyavon\dyavon.exe -Algorithm SHA256).Hash
 ```
 
-Must be exactly size `13577728` bytes, SHA256
-`6889E7A551BAB473E8C0B3CECBED11CFE6CAF502028761AD5FDE5FD1BC2C504F`.
+Must be exactly size `13599232` bytes, SHA256
+`082A6796C1AD2CCCAB424D620BBD3CC068975D1107AF16B227526F3BD943C59E`.
 If either differs, stop and say so — do not launch it.
 
 Rotate the log so this run stands alone, then relaunch:

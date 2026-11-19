@@ -27,8 +27,8 @@ Invoke-WebRequest -Uri http://192.168.137.2:8000/dyavon.exe -OutFile $HOME\dyavo
 
 Verify the download — it must match exactly:
 
-- size: `13577728` bytes
-- SHA256: `6889E7A551BAB473E8C0B3CECBED11CFE6CAF502028761AD5FDE5FD1BC2C504F`
+- size: `13599232` bytes
+- SHA256: `082A6796C1AD2CCCAB424D620BBD3CC068975D1107AF16B227526F3BD943C59E`
 
 ```powershell
 Get-FileHash $HOME\dyavon\dyavon.exe -Algorithm SHA256
