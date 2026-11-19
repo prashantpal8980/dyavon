@@ -45,16 +45,16 @@ fi
 # The two host variants share target/release/dyavon, so build each then immediately
 # copy it to its own staged name before the next build overwrites it.
 echo "==> building Linux headless (release, --no-default-features)"
-cargo build --release -p mouse --no-default-features
+cargo build --release -p dyavon --no-default-features
 HEADLESS_LINUX="$STAGE/dyavon-headless"
 cp target/release/dyavon "$HEADLESS_LINUX"
 
 echo "==> building Linux GUI (release)"
-RUSTFLAGS="$RUSTFLAGS_GUI" cargo build --release -p mouse
+RUSTFLAGS="$RUSTFLAGS_GUI" cargo build --release -p dyavon
 cp target/release/dyavon "$STAGE/dyavon"
 
 echo "==> building Windows GUI (release)"
-cargo build --release -p mouse --target "$WIN_TARGET"
+cargo build --release -p dyavon --target "$WIN_TARGET"
 cp "target/$WIN_TARGET/release/dyavon.exe" "$STAGE/dyavon.exe"
 
 # ---------------- Linux tarball ----------------
@@ -77,7 +77,7 @@ EOF
 chmod +x "$LX/run-gui.sh" "$LX/dyavon" "$LX/dyavon-headless"
 
 cat > "$LX/README.txt" <<EOF
-dyavon v$VER — Linux (x86_64)
+Dyavon v$VER — Linux (x86_64)
 
 Share one keyboard/mouse between this machine and another over the LAN.
 Requires an X11 session (not Wayland) on Linux.
@@ -120,7 +120,7 @@ cp "$STAGE/dyavon.exe" "$WX/dyavon.exe"
 cp config.example.json "$WX/config.example.json"
 
 cat > "$WX/README.txt" <<EOF
-dyavon v$VER — Windows (x86_64)
+Dyavon v$VER — Windows (x86_64)
 
 Share one keyboard/mouse between this machine and another over the LAN.
 dyavon.exe is self-contained (only standard Win32 DLLs).

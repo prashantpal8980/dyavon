@@ -31,14 +31,14 @@ export DYAVON_CHANNEL=test
 
 case "$MODE" in
   install)
-    cargo build --release -p mouse
-    cargo build --release --target x86_64-pc-windows-gnu -p mouse
+    cargo build --release -p dyavon
+    cargo build --release --target x86_64-pc-windows-gnu -p dyavon
     echo "==> built $VERSION. Restart dyavon on Kali, then: scripts/serve-windows.sh --no-build"
     ;;
   publish)
     export CARGO_TARGET_DIR="$REPO_ROOT/target/fake-release"
-    cargo build --release -p mouse
-    cargo build --release --target x86_64-pc-windows-gnu -p mouse
+    cargo build --release -p dyavon
+    cargo build --release --target x86_64-pc-windows-gnu -p dyavon
     OUT="$HOME/mouse-serve/release"
     mkdir -p "$OUT"
     cp -f "$CARGO_TARGET_DIR/release/dyavon" "$OUT/dyavon"

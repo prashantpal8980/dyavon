@@ -39,8 +39,8 @@ STAGE="$CARGO_TARGET_DIR/stage-$VERSION"
 
 echo "==> dyavon $VERSION, updates from $REPO"
 cargo test --workspace --quiet
-cargo build --release -p mouse
-cargo build --release -p mouse --target "$WIN_TARGET"
+cargo build --release -p dyavon
+cargo build --release -p dyavon --target "$WIN_TARGET"
 LIN_BIN="$CARGO_TARGET_DIR/release/dyavon"
 WIN_BIN="$CARGO_TARGET_DIR/$WIN_TARGET/release/dyavon.exe"
 
@@ -67,11 +67,11 @@ chmod +x "$OUT/dyavon"
 WX="$STAGE/dyavon-$VERSION-windows-x86_64"
 mkdir -p "$WX"
 cp "$WIN_BIN" "$WX/dyavon.exe"
-# Apache-2.0 for dyavon itself, and the notices of every crate built into it.
+# Apache-2.0 for Dyavon itself, and the notices of every crate built into it.
 cp LICENSE NOTICE "$WX/"
 python3 scripts/third-party-licenses.py "$WX/THIRD-PARTY-LICENSES.txt" --filter-platform "$WIN_TARGET"
 cat > "$WX/README.txt" <<EOF
-dyavon $VERSION for Windows 10 and 11
+Dyavon $VERSION for Windows 10 and 11
 
 1. Double-click dyavon.exe.
    Windows may say "Windows protected your PC" the first time, because the program
@@ -80,7 +80,7 @@ dyavon $VERSION for Windows 10 and 11
    "Shares its mouse" on the computer whose keyboard and mouse you use,
    "Is controlled" on the other one.
 3. On the computer that shares its mouse, press "Pair a new device".
-   Type the 6-digit code it shows into the other computer's dyavon window.
+   Type the 6-digit code it shows into the other computer's Dyavon window.
 
 That is all. Push the pointer off the edge of the screen to move to the other
 computer. Press Scroll Lock to take control back at any time.
@@ -106,7 +106,7 @@ exec "$DIR/dyavon" "$@"
 EOF
 chmod +x "$LX/run.sh" "$LX/dyavon"
 cat > "$LX/README.txt" <<EOF
-dyavon $VERSION for Linux (x86_64, X11 desktops)
+Dyavon $VERSION for Linux (x86_64, X11 desktops)
 
 Needs an X11 session (most desktops offer one at the login screen; Wayland is not
 supported yet) and two common libraries:
@@ -117,7 +117,7 @@ supported yet) and two common libraries:
    "Shares its mouse" on the computer whose keyboard and mouse you use,
    "Is controlled" on the other one.
 3. On the computer that shares its mouse, press "Pair a new device".
-   Type the 6-digit code it shows into the other computer's dyavon window.
+   Type the 6-digit code it shows into the other computer's Dyavon window.
 
 Push the pointer off the edge of the screen to move to the other computer. Press
 Scroll Lock to take control back at any time. Settings > Startup can start it at login.
@@ -126,7 +126,7 @@ EOF
 tar -C "$STAGE" -czf "$OUT/dyavon-$VERSION-linux-x86_64.tar.gz" "dyavon-$VERSION-linux-x86_64"
 
 # ---------------- signed latest.json + checksums ----------------
-"$REPO_ROOT/scripts/sign-release.sh" "$OUT" "$VERSION" "$ASSETS" "dyavon $VERSION is available."
+"$REPO_ROOT/scripts/sign-release.sh" "$OUT" "$VERSION" "$ASSETS" "Dyavon $VERSION is available."
 ( cd "$OUT" && sha256sum dyavon dyavon.exe ./*.zip ./*.tar.gz latest.json latest.json.sig > SHA256SUMS )
 
 echo "==> $VERSION is ready in $OUT (nothing uploaded):"
