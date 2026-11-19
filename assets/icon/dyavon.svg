@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="#f0a24a"/>
+  <!-- a bold D -->
+  <path d="M66 52 H124 C 178 52, 210 86, 210 128 C 210 170, 178 204, 124 204 H66 Z" fill="#1d1a17"/>
+  <!-- the river runs through it, splitting it into a pair -->
+  <path d="M40 140 C 80 110, 110 170, 150 140 S 200 112, 232 128" fill="none" stroke="#f0a24a" stroke-width="18" stroke-linecap="round"/>
+</svg>

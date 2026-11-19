@@ -515,6 +515,10 @@ pub struct Config {
     pub peer_name: String,
     /// Look for a newer version at start and once a day (R36).
     pub check_updates: bool,
+    /// The user chose "Run without installing" (R50), so the install offer is not shown
+    /// again on this computer.
+    #[serde(default)]
+    pub install_declined: bool,
     // `warp_threshold_px` (the Python app's "return distance") was dropped on 2026-10-14
     // by the owner's decision: the Rust engine never read it. Old config files that still
     // carry the key load fine, because unknown keys are ignored.
@@ -595,6 +599,7 @@ impl Default for Config {
             theme_follow_system: false,
             peer_name: String::new(),
             check_updates: true,
+            install_declined: false,
         }
     }
 }

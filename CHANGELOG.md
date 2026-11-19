@@ -6,6 +6,17 @@ Dates are when the work was committed. Item codes refer to
 
 ## Unreleased
 
+- **Install and remove (R50).** The downloaded program offers to install itself, after
+  showing the licence and disclaimer, with options for a desktop shortcut, a Start-menu or
+  app-menu entry and start at login. No administrator or root rights. On Windows it appears
+  in **Settings › Apps**. **Settings › Remove Dyavon from this computer…** removes it all,
+  with a switch to keep or delete your settings and pairings.
+- **An icon:** a "D" split by a river, on the exe, window, tray, shortcuts and app menu.
+  The Windows exe also carries its name and version (Properties › Details).
+- **Licence and disclaimer** on the install screen, in About, the README, the user guide
+  and the read-me in each download.
+- **B78:** the Linux binary finds its bundled libxdo by itself, so start at login works on
+  a machine without the libxdo3 package.
 - **Renamed to Dyavon** (say *DAY-uh-von*). *Your cursor knows no border.* The program is
   now `dyavon` / `dyavon.exe`, settings live in `~/.dyavon` (`%USERPROFILE%\.dyavon`), and
   environment variables start `DYAVON_`. A machine set up as mouse-rs copies its settings,

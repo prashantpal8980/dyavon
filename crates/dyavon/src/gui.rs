@@ -54,6 +54,8 @@ enum Page {
     Appearance,
     Diagnostics,
     About,
+    /// R50: the last row of the index, not one of the categories.
+    Remove,
 }
 
 impl Page {
@@ -75,6 +77,7 @@ impl Page {
             Page::Appearance => "Appearance",
             Page::Diagnostics => "Diagnostics",
             Page::About => "About",
+            Page::Remove => "Remove Dyavon",
         }
     }
     fn summary(self) -> &'static str {
@@ -88,7 +91,8 @@ impl Page {
             Page::Security => "PIN, pairing, encryption",
             Page::Appearance => "Theme",
             Page::Diagnostics => "Log file, support logs",
-            Page::About => "Version, restore defaults",
+            Page::About => "Version, licence, restore defaults",
+            Page::Remove => "From this computer, with or without your settings",
         }
     }
 }
@@ -254,6 +258,17 @@ enum Message {
     CloseRequested,
     /// "Quit anyway" / "Stop anyway" on the transfer-in-progress warning.
     LeaveAnyway,
+    // --- R50: install and remove ---
+    InstallAccepted(bool),
+    InstallDesktop(bool),
+    InstallMenu(bool),
+    InstallLogin(bool),
+    InstallNow,
+    InstallSkip,
+    RemoveDeleteSettings(bool),
+    RemoveNow,
+    RemoveClose,
+    OpenLicense,
     /// The elevated relaunch itself, once any transfer warning has been answered.
     RelaunchElevatedNow,
     /// "Keep going" on that warning.
@@ -447,6 +462,16 @@ struct App {
     /// system is not actually in.
     #[cfg(target_os = "linux")]
     login_screen_asking: bool,
+    /// R50: the install screen is showing instead of the panel.
+    install_offer: bool,
+    install_opts: crate::install::Options,
+    install_accepted: bool,
+    install_error: Option<String>,
+    /// R50: "Also delete my settings and pairings" on the Remove page.
+    remove_delete_settings: bool,
+    /// Set once removal has run: nothing may be saved again, or the settings folder that
+    /// was just deleted comes back.
+    removed: Option<Vec<crate::install::Done>>,
     /// Why "Allow and turn on" did not go ahead (a PIN too short, two that differ).
     #[cfg(target_os = "linux")]
     login_dialog_error: String,
@@ -646,6 +671,13 @@ impl App {
             login_screen_stale: crate::greeter::installed_copy_is_current() == Some(false),
             #[cfg(target_os = "linux")]
             login_screen_asking: false,
+            install_offer: crate::install::should_offer(cfg.install_declined)
+                && std::env::var_os("DYAVON_OPEN_SETTINGS").is_none(),
+            install_opts: crate::install::Options::default(),
+            install_accepted: false,
+            install_error: None,
+            remove_delete_settings: false,
+            removed: None,
             #[cfg(target_os = "linux")]
             login_dialog_error: String::new(),
             confirm_leave: None,
@@ -691,7 +723,9 @@ impl App {
         // page can be checked without clicking through a live panel, where synthetic
         // clicks can be forwarded to the other machine.
         if let Ok(want) = std::env::var("DYAVON_OPEN_SETTINGS") {
-            let all = std::iter::once(Page::Index).chain(Page::CATEGORIES.iter().flat_map(|(_, p)| p.iter().copied()));
+            let all = std::iter::once(Page::Index)
+                .chain(Page::CATEGORIES.iter().flat_map(|(_, p)| p.iter().copied()))
+                .chain(std::iter::once(Page::Remove));
             let want = want.to_lowercase();
             if want == "clipboard-tab" {
                 app.tab = Tab::Clipboard;
@@ -957,6 +991,9 @@ impl App {
     /// Write the settings if they differ from what is on disk.
     fn autosave(&mut self) {
         self.last_edit = None;
+        if self.removed.is_some() {
+            return;
+        }
         let same = serde_json::to_value(&self.cfg).ok() == serde_json::to_value(&self.saved_cfg).ok();
         if !same {
             let _ = self.handle(Message::SaveConfig);
@@ -1031,7 +1068,7 @@ impl App {
                 // because the window doesn't exist yet at construction time, so there is
                 // nothing to minimize; and starting the engine here keeps the Start path
                 // identical to the button's.
-                if !self.launch_done {
+                if !self.launch_done && !self.install_offer {
                     self.launch_done = true;
                     if self.cfg.autoconnect && !self.running() {
                         self.start_engine();
@@ -1314,6 +1351,39 @@ impl App {
                     Ok(_) => format!("opened {}", dir.display()),
                     Err(e) => format!("could not open {}: {e}", dir.display()),
                 };
+            }
+            Message::InstallAccepted(v) => self.install_accepted = v,
+            Message::InstallDesktop(v) => self.install_opts.desktop_shortcut = v,
+            Message::InstallMenu(v) => self.install_opts.menu_entry = v,
+            Message::InstallLogin(v) => self.install_opts.start_at_login = v,
+            Message::InstallSkip => {
+                self.install_offer = false;
+                self.cfg.install_declined = true;
+                self.last_edit = Some(std::time::Instant::now());
+            }
+            Message::InstallNow if self.install_accepted => {
+                self.install_error = None;
+                match crate::install::install(self.install_opts).and_then(|exe| crate::install::start(&exe).map(|()| exe)) {
+                    Ok(exe) => {
+                        tracing::info!("started the installed copy at {}; this copy quits", exe.display());
+                        return iced::exit();
+                    }
+                    Err(e) => self.install_error = Some(format!("{e:#}")),
+                }
+            }
+            Message::InstallNow => {}
+            Message::RemoveDeleteSettings(v) => self.remove_delete_settings = v,
+            Message::RemoveNow => {
+                // Sharing stops first: it writes the clipboard history as it goes.
+                self.stop_engine();
+                self.engine = None;
+                let cache = self.cfg.cache_dir.clone();
+                self.removed = Some(crate::install::uninstall(!self.remove_delete_settings, &cache));
+            }
+            Message::RemoveClose => return iced::exit(),
+            Message::OpenLicense => {
+                let opener = if cfg!(windows) { "explorer" } else { "xdg-open" };
+                let _ = std::process::Command::new(opener).arg(crate::install::LICENSE_URL).spawn();
             }
             Message::AskRestoreDefaults => self.confirm_restore = true,
             Message::CancelRestoreDefaults => self.confirm_restore = false,
@@ -1913,6 +1983,7 @@ impl App {
                 }
             }
             Message::Stop => return self.leave(Leave::Stop),
+            Message::SaveConfig if self.removed.is_some() => {}
             Message::SaveConfig => {
                 let path = Config::default_path();
                 self.feedback = match self.cfg.save(&path) {
@@ -2164,6 +2235,22 @@ impl App {
             .padding(Padding { top: 14.0, right: 20.0, bottom: 16.0, left: 20.0 })
             .width(Length::Fill)
             .style(move |_| ui_theme::root(h));
+
+        // After removal, only the summary and Close: nothing to go back to (R50).
+        if self.removed.is_some() {
+            return container(scroll(container(self.page_remove(p)).padding(24.0)))
+                .style(move |_| ui_theme::root(p))
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .into();
+        }
+        if self.install_offer {
+            return container(scroll(container(self.install_screen(p)).padding(Padding { top: 20.0, right: 24.0, bottom: 20.0, left: 24.0 })))
+                .style(move |_| ui_theme::root(p))
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .into();
+        }
 
         let body: Element<'_, Message> = match self.page {
             None => {
@@ -3603,6 +3690,7 @@ impl App {
             Page::Appearance => self.page_appearance(p),
             Page::Diagnostics => self.page_diagnostics(p),
             Page::About => self.page_about(p),
+            Page::Remove => self.page_remove(p),
         }
     }
 
@@ -3618,6 +3706,14 @@ impl App {
                 .collect();
             col = col.push(group(p, rows));
         }
+        col = col.push(Space::new().height(18.0));
+        col = col.push(group(p, vec![nav(
+            p,
+            "Remove Dyavon from this computer…",
+            Page::Remove.summary(),
+            Space::new().width(0.0).into(),
+            Message::OpenSettings(Page::Remove),
+        )]));
         col.into()
     }
 
@@ -3655,7 +3751,7 @@ impl App {
                 if c.theme_follow_system { "Match system".to_string() } else { Theme6::from_key(&c.theme).label().to_string() }
             }
             Page::About => format!("Version {}", crate::update::VERSION),
-            Page::Index | Page::Diagnostics => String::new(),
+            Page::Index | Page::Diagnostics | Page::Remove => String::new(),
         };
         value_text(p, v)
     }
@@ -4708,6 +4804,117 @@ impl App {
         }
     }
 
+    /// R50: what the user agrees to and chooses before Dyavon installs itself.
+    fn install_screen(&self, p: Palette) -> Element<'_, Message> {
+        let where_to = crate::install::install_dir().map(|d| d.display().to_string()).unwrap_or_default();
+        // Right padding inside the scroll keeps the text clear of its scrollbar.
+        let legal = container(scroll(container(text(crate::install::LEGAL_SUMMARY).size(12.5).color(p.txt2)).padding(Padding {
+            top: 0.0,
+            right: 14.0,
+            bottom: 0.0,
+            left: 0.0,
+        })))
+            .padding([12.0, 14.0])
+            .height(150.0)
+            .width(Length::Fill)
+            .style(move |_| ui_theme::group(p));
+        let menu_label = if cfg!(windows) { "Add to the Start menu" } else { "Add to the app menu" };
+        let mut col = column![
+            row![
+                iced::widget::image(iced::widget::image::Handle::from_rgba(64, 64, crate::brand::ICON_64_RGBA.to_vec()))
+                    .width(48.0)
+                    .height(48.0),
+                column![
+                    text("Install Dyavon").size(22.0).font(BOLD).color(p.txt),
+                    text("Your cursor knows no border.").size(13.0).color(p.txt2),
+                ]
+                .spacing(2.0),
+            ]
+            .spacing(14.0)
+            .align_y(Alignment::Center),
+            section(p, "Licence and disclaimer"),
+            legal,
+            group(p, vec![tog(p, "I accept the licence", "Needed to install", self.install_accepted, Message::InstallAccepted)]),
+            row![Space::new().width(Length::Fill), btn_link(p, "Read the full licence", Message::OpenLicense)],
+            section(p, "Options"),
+            group(p, vec![
+                tog(p, "Desktop shortcut", "An icon on your desktop", self.install_opts.desktop_shortcut, Message::InstallDesktop),
+                tog(p, menu_label, "Find Dyavon by searching for it", self.install_opts.menu_entry, Message::InstallMenu),
+                tog(p, "Start at login", "Dyavon opens when you log in", self.install_opts.start_at_login, Message::InstallLogin),
+            ]),
+            text(format!("Installs for you only, into {where_to}. No administrator rights needed."))
+                .size(11.5)
+                .color(p.txt3),
+        ]
+        .spacing(8.0);
+        if let Some(e) = &self.install_error {
+            col = col.push(note(p, p.danger, format!("Could not install: {e}")));
+        }
+        col.push(
+            row![
+                btn_secondary(p, "Run without installing", Some(Message::InstallSkip)),
+                Space::new().width(Length::Fill),
+                btn_primary(p, "Install", self.install_accepted.then_some(Message::InstallNow)),
+            ]
+            .spacing(8.0),
+        )
+        .into()
+    }
+
+    /// R50: say what goes, let the settings be kept, then report what happened.
+    fn page_remove(&self, p: Palette) -> Element<'_, Message> {
+        if let Some(steps) = &self.removed {
+            let mut rows = column![].spacing(6.0);
+            for d in steps {
+                rows = rows.push(note(p, if d.ok { p.good } else { p.danger }, d.what.clone()));
+            }
+            return column![
+                Space::new().height(8.0),
+                text("Dyavon has been removed").size(16.0).font(BOLD).color(p.txt),
+                rows,
+                row![Space::new().width(Length::Fill), btn_primary(p, "Close Dyavon", Some(Message::RemoveClose))],
+            ]
+            .spacing(12.0)
+            .into();
+        }
+        let gone = [
+            "Start at login, the shortcuts and the app-menu entry",
+            if cfg!(windows) {
+                "Its entry in Settings › Apps, its firewall rules and the administrator login task (Windows asks once)"
+            } else {
+                "Login-screen sharing, if it is set up (asks for your password)"
+            },
+            "Received files and the clipboard cache",
+            "The installed program",
+        ];
+        let mut list = column![].spacing(6.0);
+        for g in gone {
+            list = list.push(note(p, p.txt3, g));
+        }
+        let settings_line = if self.remove_delete_settings {
+            "Your settings and pairings are deleted too. A reinstall starts from the beginning, and each computer has to be paired again."
+        } else {
+            "Your settings and pairings are kept, so installing again later picks up where you left off."
+        };
+        column![
+            Space::new().height(8.0),
+            text("This removes Dyavon from this computer:").size(13.0).color(p.txt2),
+            list,
+            group(p, vec![tog(
+                p,
+                "Also delete my settings and pairings",
+                "Off: kept for a reinstall",
+                self.remove_delete_settings,
+                Message::RemoveDeleteSettings,
+            )]),
+            text(settings_line).size(12.0).color(p.txt3),
+            text("Sharing stops, and Dyavon closes when it is done.").size(12.0).color(p.txt3),
+            row![Space::new().width(Length::Fill), btn_danger(p, "Remove Dyavon", Some(Message::RemoveNow))],
+        ]
+        .spacing(10.0)
+        .into()
+    }
+
     fn page_about(&self, p: Palette) -> Element<'_, Message> {
         column![
             Space::new().height(8.0),
@@ -4720,6 +4927,12 @@ impl App {
                     if crate::update::TEST_BUILD { "Test build: at start and every minute" } else { "Each time Dyavon starts" },
                     self.cfg.check_updates,
                     Message::UpdatesToggled,
+                ),
+                srow(
+                    p,
+                    "Licence",
+                    "Free and open source (Apache 2.0). Provided as is, without warranty.",
+                    btn_secondary(p, "Read", Some(Message::OpenLicense)),
                 ),
                 srow(
                     p,
@@ -5502,6 +5715,7 @@ pub fn launch(cfg: Config) -> anyhow::Result<()> {
             min_size: Some(iced::Size::new(360.0, 420.0)),
             // Closing still quits; `close_requests` routes it through Quit's check.
             exit_on_close_request: false,
+            icon: iced::window::icon::from_rgba(crate::brand::ICON_64_RGBA.to_vec(), 64, 64).ok(),
             ..Default::default()
         })
         .run()

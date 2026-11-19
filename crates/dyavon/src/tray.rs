@@ -188,29 +188,8 @@ pub fn spawn(initial_tooltip: &str) -> Option<TrayHandle> {
     }
 }
 
-/// A simple 32×32 icon — an accent disc with a white centre, built from raw RGBA so
+/// The Dyavon icon at 32×32 (see `brand`), built into the binary so
 /// there's no image file to ship.
 fn icon_rgba() -> (Vec<u8>, u32, u32) {
-    const S: i32 = 32;
-    let mut px = vec![0u8; (S * S * 4) as usize];
-    let (cx, cy, r) = (15.5f32, 15.5f32, 14.0f32);
-    for y in 0..S {
-        for x in 0..S {
-            let (dx, dy) = (x as f32 - cx, y as f32 - cy);
-            let d = (dx * dx + dy * dy).sqrt();
-            if d <= r {
-                let i = ((y * S + x) * 4) as usize;
-                let (rr, gg, bb) = if d <= r * 0.45 {
-                    (0xff, 0xff, 0xff)
-                } else {
-                    (0x38, 0xd6, 0xe6)
-                };
-                px[i] = rr;
-                px[i + 1] = gg;
-                px[i + 2] = bb;
-                px[i + 3] = 0xff;
-            }
-        }
-    }
-    (px, S as u32, S as u32)
+    (crate::brand::ICON_32_RGBA.to_vec(), 32, 32)
 }

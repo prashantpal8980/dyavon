@@ -60,7 +60,11 @@ mixed in any combination. It takes about a minute per computer, and nothing need
 2. Extract it anywhere, for example to your Documents folder, and double-click **`dyavon.exe`**.
 3. Windows may say **"Windows protected your PC"** the first time, because Dyavon is new
    and not yet code-signed. Click **More info**, then **Run anyway**.
-4. When Windows Firewall asks, tick **Private networks** and click **Allow access**.
+4. **Install Dyavon** opens. Read the licence, switch on **I accept the licence**, pick your
+   options (desktop shortcut, Start menu, start at login) and click **Install**. It installs
+   for you only, with no administrator rights, and shows up in **Settings › Apps**.
+   Prefer not to install? **Run without installing** keeps it portable.
+5. When Windows Firewall asks, tick **Private networks** and click **Allow access**.
 
 ### 🐧 Linux (X11 desktops)
 
@@ -71,7 +75,10 @@ mixed in any combination. It takes about a minute per computer, and nothing need
    cd dyavon-*-linux-x86_64
    ./run.sh
    ```
-3. If it says a library is missing, install these once, then run it again:
+3. **Install Dyavon** opens: accept the licence, pick your options (desktop launcher, app
+   menu, start at login) and click **Install**. It goes into `~/.local/share/dyavon`, with no
+   root needed. Or choose **Run without installing**.
+4. If it says a library is missing, install these once, then run it again:
    ```sh
    sudo apt install libgtk-3-0 libayatana-appindicator3-1
    ```
@@ -146,6 +153,31 @@ or what you type at the login screen.
 | Linux says a library is missing | `sudo apt install libgtk-3-0 libayatana-appindicator3-1` |
 
 Known issues, with their status, are listed in [docs/KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md).
+
+---
+
+## 🗑️ Remove Dyavon
+
+**Settings › Remove Dyavon from this computer…** removes the program, its shortcuts, start at
+login, received files and (on Windows) its firewall rules and **Settings › Apps** entry. A
+switch decides whether your settings and pairings are deleted too or kept for a reinstall.
+On Windows you can also start it from **Settings › Apps › Dyavon › Uninstall**.
+
+---
+
+## ⚖️ Licence and disclaimer
+
+Dyavon is free, open-source software under the **[Apache License 2.0](LICENSE)**.
+
+It is provided **"AS IS", without warranties or conditions of any kind**, either express or
+implied. You use it at your own risk. To the extent allowed by law, the authors and
+contributors are **not liable** for any damage, loss of data or other harm arising from its
+use, or from being unable to use it. The [licence](LICENSE) (sections 7 and 8) is what
+applies; this paragraph only summarises it.
+
+Dyavon lets a paired computer control this one and exchange clipboard contents and files with
+it, so pair only computers you trust. It sends nothing about you anywhere: it checks GitHub for
+a new version at start (you can turn that off) and talks only to the computers you pair.
 
 ---
 

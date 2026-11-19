@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="#1d1a17"/>
+  <!-- the border the cursor ignores -->
+  <path d="M128 34 V222" stroke="#5a5048" stroke-width="10" stroke-linecap="round" stroke-dasharray="1 26"/>
+  <!-- the river: a flow from one side to the other -->
+  <path d="M30 170 C 70 140, 100 200, 140 170 S 200 140, 226 160" fill="none" stroke="#3fb6a8" stroke-width="16" stroke-linecap="round"/>
+  <!-- the cursor, already across -->
+  <path d="M112 52 L112 176 L142 148 L162 196 L184 186 L164 140 L204 138 Z" fill="#f0a24a" stroke="#1d1a17" stroke-width="8" stroke-linejoin="round"/>
+</svg>

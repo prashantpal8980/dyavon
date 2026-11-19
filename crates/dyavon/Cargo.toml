@@ -41,7 +41,7 @@ ureq = { version = "2.12", default-features = false, features = ["tls"] }
 # with x11+wayland on Linux. Verified to cross-compile cleanly to windows-gnu.
 # `tokio` backend enables `iced::time::every` for the live-status poll (the project
 # already uses tokio; iced's UI runtime is independent of the engine's).
-iced = { version = "0.14", features = ["tokio"], optional = true }
+iced = { version = "0.14", features = ["tokio", "image-without-codecs"], optional = true }
 # System tray (re-exports `muda` as `tray_icon::menu`, so no separate menu dep).
 tray-icon = { version = "0.24", optional = true }
 # Random secret generation for the GUI's "Generate" button.

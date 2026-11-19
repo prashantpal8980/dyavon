@@ -111,7 +111,7 @@
   .shot{position:relative;border-radius:10px;overflow:visible;box-shadow:var(--shadow);background:#1c1814}
   .shot img{display:block;width:100%;height:auto;border-radius:10px}
   .shot.win{margin-top:30px;border-radius:0 0 10px 10px}
-  .shot.win::before{content:"dyavon";position:absolute;top:-30px;left:0;right:0;height:30px;line-height:30px;padding-left:12px;color:#ddd;font-size:12px;font-family:"Segoe UI",sans-serif;background:#202020;border-radius:10px 10px 0 0;box-shadow:0 -4px 14px rgba(40,25,10,.12)}
+  .shot.win::before{content:"Dyavon";position:absolute;top:-30px;left:0;right:0;height:30px;line-height:30px;padding-left:12px;color:#ddd;font-size:12px;font-family:"Segoe UI",sans-serif;background:#202020;border-radius:10px 10px 0 0;box-shadow:0 -4px 14px rgba(40,25,10,.12)}
   .shot.win::after{content:"—    ☐    ✕";position:absolute;top:-30px;right:14px;height:30px;line-height:30px;color:#bbb;font-size:12px;letter-spacing:2px}
   .shot.win img{border-radius:0 0 10px 10px}
   .n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--mark);color:#fff;font-weight:800;font-size:14px;box-shadow:0 0 0 3px var(--ring),0 2px 8px rgba(0,0,0,.35)}
@@ -231,6 +231,8 @@
   <a href="#tier3">Rarely needed</a>
   <h4>Help</h4>
   <a href="#trouble">If something doesn't work</a>
+  <a href="#remove">Removing Dyavon</a>
+  <a href="#legal">Licence and disclaimer</a>
   <a href="#report">Report a problem</a>
 </nav>
 
@@ -330,7 +332,7 @@
 
 <!-- ================= OPEN ON WINDOWS ================= -->
 <h2 id="open">2 · Open it on Windows <span class="tag t-win">WINDOWS</span></h2>
-<p>Windows shows up to three warnings the first time. They're normal for a new free app that isn't code-signed yet. Here's each one and what to click.</p>
+<p>Windows shows up to three warnings the first time, and Dyavon offers to install itself. They're normal for a new free app that isn't code-signed yet. Here's each one and what to click.</p>
 
 <div class="step">
   <div>
@@ -366,7 +368,7 @@
       <li><span class="n">3</span>A new folder opens. Double-click <b>dyavon.exe</b>.</li>
     </ol>
     <div class="warn"><b>Don't run it from inside the zip.</b> Opening the zip shows <code>dyavon.exe</code>, but Windows would run it from a temporary folder, and your settings may not stick. Always <b>Extract All</b> first.</div>
-    <div class="tip"><b>Tip: give it a permanent home.</b> Move the extracted folder somewhere you won't delete by accident, e.g. <code>Documents\dyavon</code>, <i>before</i> turning on "Start at login". Dyavon is a "portable" app: there's no installer, and the folder <i>is</i> the app.</div>
+    <div class="tip"><b>The extracted folder is only needed once.</b> When you install Dyavon (step d), it copies itself to its own folder, so you can delete the download afterwards. If you choose <b>Run without installing</b> instead, move the folder somewhere you won't delete by accident first, e.g. <code>Documents\dyavon</code>: then the folder <i>is</i> the app.</div>
   </div>
   <figure>
     <span class="illus-label"><span class="tag t-illus">DRAWN ILLUSTRATION</span></span>
@@ -410,7 +412,32 @@
 
 <div class="step">
   <div>
-    <h3 style="margin-top:0">d) Windows Firewall <span class="tag t-once">FIRST TIME IT CONNECTS</span></h3>
+    <h3 style="margin-top:0">d) Install Dyavon <span class="tag t-once">FIRST RUN ONLY</span></h3>
+    <p>Dyavon offers to install itself. Installing gives you a desktop shortcut, a Start-menu entry and an entry in <b>Settings › Apps</b>, so it's easy to find and to remove later. It installs for you only, so it doesn't ask for administrator rights.</p>
+    <ol class="marks">
+      <li><span class="n">1</span>Read the licence and disclaimer in the box, then switch on <b>I accept the licence</b>.</li>
+      <li><span class="n">2</span>Leave the options as they are, or change them. <b>Start at login</b> is worth turning on.</li>
+      <li><span class="n">3</span>Click <b>Install</b>. The window closes and the installed Dyavon opens straight away.</li>
+    </ol>
+    <div class="note"><b>Rather not install?</b> <b>Run without installing</b> keeps it as a portable program in the folder you extracted. Dyavon won't ask again.</div>
+  </div>
+  <figure>
+    <div class="shot win">
+      <img src="img/install.png" alt="The Install Dyavon screen">
+      <div class="hl pulse" style="left:4.3%;top:38.9%;width:91.4%;height:8%"></div>
+      <span class="n" style="left:1%;top:42.2%">1</span>
+      <div class="hl" style="left:4.3%;top:59.3%;width:91.4%;height:24.7%;border-style:dashed;box-shadow:none"></div>
+      <span class="n" style="left:1%;top:71%">2</span>
+      <div class="hl pulse" style="left:83.2%;top:88.3%;width:12.5%;height:4.4%"></div>
+      <span class="n" style="left:79.5%;top:89.9%">3</span>
+    </div>
+    <figcaption>The install screen (real screenshot; on Windows the second option says "Add to the Start menu")</figcaption>
+  </figure>
+</div>
+
+<div class="step">
+  <div>
+    <h3 style="margin-top:0">e) Windows Firewall <span class="tag t-once">FIRST TIME IT CONNECTS</span></h3>
     <p>When Dyavon first starts sharing, Windows asks whether it may use the network. It needs this to talk to your other computer.</p>
     <ol class="marks">
       <li><span class="n">1</span>Leave <b>Private networks</b> ticked. That's your home or office network.</li>
@@ -436,7 +463,7 @@
 
 <div class="step">
   <div>
-    <h3 style="margin-top:0">e) "Running with normal permissions" <span class="tag t-once">ONE-TIME MESSAGE</span></h3>
+    <h3 style="margin-top:0">f) "Running with normal permissions" <span class="tag t-once">ONE-TIME MESSAGE</span></h3>
     <p>A grey message at the top of the Dyavon window. It's only information: everything works normally. The one exception is that, while a Windows <i>administrator</i> window is in front (an installer, or a "Do you want to allow…" prompt), the pointer can't cross until you click elsewhere.</p>
     <ol class="marks"><li><span class="n">1</span>Click <b>Keep normal</b>. That's right for almost everyone.</li></ol>
     <p class="small muted">If that exception bothers you later, see <a href="#tier3">Run as administrator</a> under "Rarely needed".</p>
@@ -457,7 +484,8 @@
   <ol class="marks">
     <li><span class="n">1</span>Extract <code>dyavon-1.0.0-linux-x86_64.tar.gz</code>: right-click → <b>Extract Here</b>, or <code>tar xzf dyavon-1.0.0-linux-x86_64.tar.gz</code>.</li>
     <li><span class="n">2</span>In the new folder, run <code>./run.sh</code>.</li>
-    <li><span class="n">3</span>If it says a library is missing, install it once: <code>sudo apt install libgtk-3-0 libayatana-appindicator3-1</code>.</li>
+    <li><span class="n">3</span><b>Install Dyavon</b> opens, the same screen as on Windows (step d above). Accept the licence and click <b>Install</b>: you get an app-menu entry and a desktop launcher, in <code>~/.local/share/dyavon</code>, with no root needed. Or choose <b>Run without installing</b>.</li>
+    <li><span class="n">4</span>If it says a library is missing, install it once: <code>sudo apt install libgtk-3-0 libayatana-appindicator3-1</code>.</li>
   </ol>
   <div class="note"><b>Wayland isn't supported yet.</b> Log in with an <b>X11</b> session (on the login screen, the gear icon → "GNOME on Xorg", "Plasma (X11)" or similar). There are no SmartScreen or firewall prompts on Linux.</div>
 </div></div>
@@ -846,6 +874,19 @@
   <dt>I reinstalled Windows on one computer</dt>
   <dd>Pair again: <b>Pair a new device</b> on the computer that shares its mouse. Then remove the old entry under Security &amp; pairing.</dd>
 </dl>
+
+<h2 id="remove">Removing Dyavon</h2>
+<p>Open <b>Settings</b> and scroll to the bottom: <b>Remove Dyavon from this computer…</b>. On Windows you can also go to <b>Settings › Apps › Installed apps › Dyavon › Uninstall</b>, which opens the same screen.</p>
+<ol class="marks">
+  <li><span class="n">1</span>Decide about <b>Also delete my settings and pairings</b>. Leave it off if you might install Dyavon again: it then remembers this computer's name and its pairings. Switch it on to remove everything.</li>
+  <li><span class="n">2</span>Click <b>Remove Dyavon</b>. Windows asks once for permission to remove the firewall rules; Linux asks for your password only if login-screen sharing was set up.</li>
+  <li><span class="n">3</span>A list shows what was removed. Click <b>Close Dyavon</b>. Nothing of it keeps running.</li>
+</ol>
+<div class="note"><b>Ran it without installing?</b> Removing still turns everything off and deletes its files, but leaves the folder you extracted it to. Delete that folder yourself afterwards.</div>
+
+<h2 id="legal">Licence and disclaimer</h2>
+<p>Dyavon is free, open-source software under the <a href="https://github.com/prashantpal8980/dyavon/blob/master/LICENSE">Apache License 2.0</a>. It is provided <b>"AS IS", without warranties or conditions of any kind</b>, either express or implied. You use it at your own risk. To the extent allowed by law, the authors and contributors are <b>not liable</b> for any damage, loss of data or other harm arising from its use, or from being unable to use it. The licence itself (sections 7 and 8) is what applies; this is only a summary.</p>
+<p>Dyavon lets a paired computer control this one and exchange clipboard contents and files with it, so pair only computers you trust. It sends nothing about you anywhere: it checks GitHub for a new version when it starts (you can turn that off in About), and talks only to the computers you pair.</p>
 
 <h2 id="report">Report a problem</h2>
 <p>Open an issue at <a href="https://github.com/prashantpal8980/dyavon/issues">github.com/prashantpal8980/dyavon/issues</a> (free GitHub account needed). Say what you did and what happened, and attach the log file: <b>Settings → Diagnostics → Open folder</b>, file <code>dyavon.log</code>.</p>

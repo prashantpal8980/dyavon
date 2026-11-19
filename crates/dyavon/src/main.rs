@@ -14,6 +14,9 @@
 use dyavon_core::{Config, Role};
 use tokio_util::sync::CancellationToken;
 
+mod brand;
+#[cfg(feature = "gui")]
+mod install;
 mod logging;
 mod logship;
 mod migrate;
@@ -44,7 +47,8 @@ fn main() -> anyhow::Result<()> {
 
     let sub = std::env::args().nth(1);
 
-    let is_gui = matches!(sub.as_deref(), None | Some("gui"));
+    // `uninstall` is what Windows' Settings › Apps runs: the panel, open on Remove (R50).
+    let is_gui = matches!(sub.as_deref(), None | Some("gui") | Some("uninstall"));
     // The login-screen service logs to a file like the GUI does, because the file is
     // what gets shipped — a service that only logged to the journal would be the one
     // part of the system nobody could see from the other machine.
@@ -139,6 +143,11 @@ fn main() -> anyhow::Result<()> {
             None,
         ),
         Some("gui") | None => launch_gui(cfg),
+        #[cfg(feature = "gui")]
+        Some("uninstall") => {
+            std::env::set_var("DYAVON_OPEN_SETTINGS", "remove dyavon");
+            launch_gui(cfg)
+        }
 
         // --- the elevated helper behind "Start at login as administrator" (Windows) ---
         // Started by the panel through Windows' consent prompt; makes the change and exits.
@@ -148,6 +157,8 @@ fn main() -> anyhow::Result<()> {
         Some("autostart-elevated-off") => autostart::disable_elevated(),
         #[cfg(windows)]
         Some("firewall-allow") => autostart::firewall_allow(),
+        #[cfg(windows)]
+        Some("remove-elevated") => autostart::remove_elevated(),
 
         // --- the login-screen instance and its setup (Linux only) ---
         #[cfg(target_os = "linux")]

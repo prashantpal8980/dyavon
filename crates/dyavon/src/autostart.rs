@@ -73,12 +73,17 @@ fn remove_legacy() -> Result<()> {
 
 #[cfg(unix)]
 pub fn enable() -> Result<()> {
+    enable_for(&exe_path()?)
+}
+
+/// Start `exe` at login: the installer uses this for the copy it has just installed.
+#[cfg(unix)]
+pub fn enable_for(exe: &std::path::Path) -> Result<()> {
     let path = desktop_file()?;
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)
             .with_context(|| format!("creating {}", parent.display()))?;
     }
-    let exe = exe_path()?;
     // No arguments: a bare launch opens the control panel. Whether it then connects
     // by itself is `autoconnect`, so the two settings stay independent.
     let body = format!(
@@ -218,7 +223,10 @@ mod win {
     }
 
     pub fn enable() -> Result<()> {
-        let exe = super::exe_path()?;
+        enable_for(&super::exe_path()?)
+    }
+
+    pub fn enable_for(exe: &std::path::Path) -> Result<()> {
         // Quote the path: Program Files and friends contain spaces.
         let cmd = format!("\"{}\"", exe.display());
         let data = wide(&cmd);
@@ -541,6 +549,26 @@ mod win {
         delete_value(ENTRY)
     }
 
+    /// Removal (R50), run in the elevated helper: the administrator login task and its copy,
+    /// and both firewall rules.
+    pub fn remove_elevated() -> Result<()> {
+        // Its copy cannot be deleted while it runs.
+        let _ = std::process::Command::new("powershell.exe")
+            .args(["-NoProfile", "-NonInteractive", "-Command",
+                "Get-Process dyavon -ErrorAction SilentlyContinue | Where-Object { $_.Path -like \"$env:ProgramFiles\\dyavon\\*\" } | Stop-Process -Force"])
+            .output();
+        let res = disable_elevated();
+        let _ = std::process::Command::new("netsh.exe")
+            .args(["advfirewall", "firewall", "delete", "rule", &format!("name={FIREWALL_RULE}")])
+            .output();
+        res
+    }
+
+    /// Ask, through Windows' own prompt, to run [`remove_elevated`]. `Ok(false)`: declined.
+    pub fn remove_elevated_via_prompt() -> Result<bool> {
+        run_elevated("remove-elevated")
+    }
+
     fn delete_value(name: &str) -> Result<()> {
         let key = open_run(KEY_WRITE)?;
         // SAFETY: valid key and NUL-terminated value name.
@@ -561,7 +589,8 @@ use win::{legacy_exists, remove_legacy};
 
 #[cfg(windows)]
 pub use win::{
-    disable, disable_elevated, elevated_is_enabled, enable, enable_elevated, is_enabled,
+    disable, disable_elevated, elevated_is_enabled, enable, enable_elevated, enable_for, is_enabled,
+    remove_elevated, remove_elevated_via_prompt,
     firewall_allow, firewall_allow_via_prompt, firewall_rule_exists, relaunch_elevated,
     set_elevated_via_prompt,
 };

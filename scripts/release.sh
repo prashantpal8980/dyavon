@@ -76,15 +76,23 @@ Dyavon $VERSION for Windows 10 and 11
 1. Double-click dyavon.exe.
    Windows may say "Windows protected your PC" the first time, because the program
    is new and not yet signed. Click "More info", then "Run anyway".
-2. Choose what this computer does:
+2. "Install Dyavon" opens: read the licence, accept it, pick your options (desktop
+   shortcut, Start menu, start at login) and click Install. No administrator rights
+   are needed. Or click "Run without installing".
+3. Choose what this computer does:
    "Shares its mouse" on the computer whose keyboard and mouse you use,
    "Is controlled" on the other one.
-3. On the computer that shares its mouse, press "Pair a new device".
+4. On the computer that shares its mouse, press "Pair a new device".
    Type the 6-digit code it shows into the other computer's Dyavon window.
 
 That is all. Push the pointer off the edge of the screen to move to the other
 computer. Press Scroll Lock to take control back at any time.
 Updates are offered inside the app: About > Check now > Update now.
+To remove it: Settings > Remove Dyavon from this computer, or Settings > Apps.
+
+Licence: free, open-source software under the Apache License 2.0 (see LICENSE).
+Provided "AS IS", without warranties of any kind; to the extent allowed by law the
+authors are not liable for any damage from its use. Pair only computers you trust.
 EOF
 ( cd "$STAGE" && python3 -c "import shutil,sys; shutil.make_archive(sys.argv[1],'zip','.',sys.argv[2])" \
     "$OUT/dyavon-$VERSION-windows-x86_64" "dyavon-$VERSION-windows-x86_64" )
@@ -113,15 +121,23 @@ supported yet) and two common libraries:
     sudo apt install libgtk-3-0 libayatana-appindicator3-1
 
 1. Run ./run.sh
-2. Choose what this computer does:
+2. "Install Dyavon" opens: read the licence, accept it, pick your options (desktop
+   launcher, app menu, start at login) and click Install. It goes into
+   ~/.local/share/dyavon; no root needed. Or click "Run without installing".
+3. Choose what this computer does:
    "Shares its mouse" on the computer whose keyboard and mouse you use,
    "Is controlled" on the other one.
-3. On the computer that shares its mouse, press "Pair a new device".
+4. On the computer that shares its mouse, press "Pair a new device".
    Type the 6-digit code it shows into the other computer's Dyavon window.
 
 Push the pointer off the edge of the screen to move to the other computer. Press
 Scroll Lock to take control back at any time. Settings > Startup can start it at login.
 Updates are offered inside the app: About > Check now > Update now.
+To remove it: Settings > Remove Dyavon from this computer.
+
+Licence: free, open-source software under the Apache License 2.0 (see LICENSE).
+Provided "AS IS", without warranties of any kind; to the extent allowed by law the
+authors are not liable for any damage from its use. Pair only computers you trust.
 EOF
 tar -C "$STAGE" -czf "$OUT/dyavon-$VERSION-linux-x86_64.tar.gz" "dyavon-$VERSION-linux-x86_64"
 
