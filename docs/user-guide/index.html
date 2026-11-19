@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dyavon — User guide</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#fff; --ink:#221d17; --ink2:#5b5248; --ink3:#8a8076;
+    --line:#e7dfd4; --amber:#d9893a; --amber-soft:#fbeedd; --good:#3f8f5a; --good-soft:#e6f3ea;
+    --warn:#b5651d; --warn-soft:#fdf0e1; --blue:#2b6cb0; --blue-soft:#e8f0fa; --red:#b83a3a;
+    --mark:#e8590c;
+    --code:#f1ebe2; --kbd-line:#cbbfae; --kbd-bg:#fff; --th:#f4eee5;
+    --note-line:#c9daf0; --tip-line:#c6e2cf; --warn-line:#f0d3b3;
+    --adv-bg:#eee8f6; --adv:#6b4fa0; --rare-bg:#eceae6; --rare:#6a645c; --illus-bg:#f3e9ff; --illus:#7a45b5;
+    --shadow:0 10px 30px rgba(40,25,10,.18),0 0 0 1px rgba(0,0,0,.08);
+    --ring:#fff;
+    color-scheme:light;
+  }
+  [data-theme="dark"]{
+    --bg:#141210; --card:#1e1b18; --ink:#ece6de; --ink2:#bfb5a9; --ink3:#8d8378;
+    --line:#332e29; --amber:#e8a65d; --amber-soft:#3a2c1c; --good:#7cc596; --good-soft:#1c2b21;
+    --warn:#f0a868; --warn-soft:#33251a; --blue:#7fb0ea; --blue-soft:#1a2433; --red:#e07a7a;
+    --mark:#ff7a2e;
+    --code:#2a2622; --kbd-line:#4a433c; --kbd-bg:#26221e; --th:#25211d;
+    --note-line:#2b3a50; --tip-line:#2c4434; --warn-line:#4d3825;
+    --adv-bg:#2a2236; --adv:#c3a6ef; --rare-bg:#2a2724; --rare:#b3aaa0; --illus-bg:#2c2238; --illus:#cfa6ff;
+    --shadow:0 10px 30px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.07);
+    --ring:#141210;
+    color-scheme:dark;
+  }
+  body,nav.toc,.quick,.tier,table,.pair .side,.diagram{transition:background-color .2s,color .2s,border-color .2s}
+  .theme-btn{position:fixed;top:14px;right:18px;z-index:50;display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  .theme-btn button{all:unset;cursor:pointer;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink2)}
+  .theme-btn button[aria-pressed="true"]{background:var(--amber);color:#1d1813}
+  .diagram .d-ink{fill:var(--ink)} .diagram .d-ink2{fill:var(--ink2)} .diagram .d-ink3{fill:var(--ink3)}
+  .diagram .d-a{fill:var(--amber-soft);stroke:var(--amber)} .diagram .d-g{fill:var(--good-soft);stroke:var(--good)}
+  @media print{.theme-btn{display:none}}
+  /* Drawn Windows dialogs keep Windows' own light look in either theme. */
+  .dlg,.dl,.menu,.uac{color:#1a1a1a}
+  .dlg .muted,.uac .muted{color:#666}
+  .appbanner .a span.n{padding:0;border:0;border-radius:50%;width:22px;height:22px;font-size:12px}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,"Noto Sans",sans-serif}
+  a{color:var(--blue)}
+  code,kbd,.mono{font-family:ui-monospace,"Cascadia Mono",Consolas,"DejaVu Sans Mono",monospace;font-size:.88em}
+  kbd{display:inline-block;padding:1px 7px;border:1px solid var(--kbd-line);border-bottom-width:3px;border-radius:5px;background:var(--kbd-bg);color:var(--ink)}
+  code{background:var(--code);padding:1px 6px;border-radius:4px}
+
+  /* layout */
+  .wrap{display:grid;grid-template-columns:250px 1fr;max-width:1240px;margin:0 auto}
+  nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:28px 18px 28px 22px;border-right:1px solid var(--line)}
+  nav.toc .brand{font-weight:700;font-size:18px;margin-bottom:2px}
+  nav.toc .sub{color:var(--ink3);font-size:13px;margin-bottom:18px}
+  nav.toc h4{margin:18px 0 6px;font-size:11px;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase}
+  nav.toc a{display:block;color:var(--ink2);text-decoration:none;font-size:14px;padding:4px 8px;border-radius:6px}
+  nav.toc a:hover{background:var(--amber-soft);color:var(--ink)}
+  main{padding:36px 48px 80px;min-width:0}
+  @media (max-width:900px){.wrap{grid-template-columns:1fr} nav.toc{display:none} main{padding:20px}}
+
+  h1{font-size:38px;line-height:1.15;margin:0 0 8px}
+  h2{font-size:27px;margin:64px 0 6px;padding-top:12px;border-top:2px solid var(--line)}
+  h2 .tag{font-size:12px;vertical-align:middle;margin-left:8px}
+  h3{font-size:19px;margin:34px 0 8px}
+  p.lead{font-size:18px;color:var(--ink2);margin:0 0 24px;max-width:780px}
+  .muted{color:var(--ink3)}
+  .small{font-size:14px}
+
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-weight:600;font-size:12px;letter-spacing:.02em}
+  .t-basic{background:var(--good-soft);color:var(--good)}
+  .t-once{background:var(--amber-soft);color:var(--warn)}
+  .t-adv{background:var(--adv-bg);color:var(--adv)}
+  .t-rare{background:var(--rare-bg);color:var(--rare)}
+  .t-win{background:var(--blue-soft);color:var(--blue)}
+  .t-illus{background:var(--illus-bg);color:var(--illus)}
+
+  /* callouts */
+  .note,.tip,.warn,.good{border-radius:10px;padding:14px 18px;margin:16px 0;border:1px solid}
+  .note{background:var(--blue-soft);border-color:var(--note-line)}
+  .tip{background:var(--good-soft);border-color:var(--tip-line)}
+  .warn{background:var(--warn-soft);border-color:var(--warn-line)}
+  .good{background:var(--good-soft);border-color:var(--tip-line)}
+  .note b:first-child,.tip b:first-child,.warn b:first-child,.good b:first-child{display:block;margin-bottom:2px}
+
+  /* quick start */
+  .quick{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 28px;margin:10px 0 18px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+  .quick ol{margin:8px 0 0;padding:0;list-style:none;counter-reset:q}
+  .quick li{counter-increment:q;position:relative;padding:10px 0 10px 50px;border-top:1px dashed var(--line)}
+  .quick li:first-child{border-top:0}
+  .quick li::before{content:counter(q);position:absolute;left:0;top:9px;width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--ring);font-weight:700;display:grid;place-items:center}
+  .quick .who{font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:14px 0}
+  .pair .side{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .pair .side h4{margin:0 0 4px;font-size:15px}
+  @media (max-width:700px){.pair{grid-template-columns:1fr}}
+
+  /* step = text + screenshot */
+  .step{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,440px);gap:28px;align-items:start;margin:22px 0 30px}
+  .step.wide{grid-template-columns:1fr}
+  .step.flip{grid-template-columns:minmax(300px,440px) minmax(260px,1fr)}
+  @media (max-width:1050px){.step,.step.flip{grid-template-columns:1fr}}
+  .step ol.marks{margin:6px 0;padding:0;list-style:none}
+  .step ol.marks li{position:relative;padding:6px 0 6px 38px}
+  .step ol.marks li .n{position:absolute;left:0;top:6px}
+
+  /* screenshot frame + annotation layer */
+  figure{margin:0}
+  figcaption{font-size:13px;color:var(--ink3);margin-top:6px;text-align:center}
+  .shot{position:relative;border-radius:10px;overflow:visible;box-shadow:var(--shadow);background:#1c1814}
+  .shot img{display:block;width:100%;height:auto;border-radius:10px}
+  .shot.win{margin-top:30px;border-radius:0 0 10px 10px}
+  .shot.win::before{content:"dyavon";position:absolute;top:-30px;left:0;right:0;height:30px;line-height:30px;padding-left:12px;color:#ddd;font-size:12px;font-family:"Segoe UI",sans-serif;background:#202020;border-radius:10px 10px 0 0;box-shadow:0 -4px 14px rgba(40,25,10,.12)}
+  .shot.win::after{content:"—    ☐    ✕";position:absolute;top:-30px;right:14px;height:30px;line-height:30px;color:#bbb;font-size:12px;letter-spacing:2px}
+  .shot.win img{border-radius:0 0 10px 10px}
+  .n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--mark);color:#fff;font-weight:800;font-size:14px;box-shadow:0 0 0 3px var(--ring),0 2px 8px rgba(0,0,0,.35)}
+  .shot .n{position:absolute;transform:translate(-50%,-50%);z-index:3}
+  .hl{position:absolute;border:3px solid var(--mark);border-radius:9px;box-shadow:0 0 0 4px rgba(232,89,12,.25);z-index:2;pointer-events:none}
+  .hl.pulse{animation:pulse 1.6s ease-in-out infinite}
+  .tgt{outline:3px solid var(--mark);outline-offset:3px;border-radius:4px;animation:pulse 1.6s ease-in-out infinite}
+  .n.inl{position:static;transform:none;width:22px;height:22px;font-size:12px;margin-left:10px;vertical-align:middle;box-shadow:0 0 0 2px var(--ring)}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(232,89,12,.25)}50%{box-shadow:0 0 0 9px rgba(232,89,12,.08)}}
+  .callout{position:absolute;z-index:4;background:var(--mark);color:#fff;font-weight:700;font-size:13px;padding:5px 10px;border-radius:7px;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+  .callout.l::after,.callout.r::after,.callout.u::after,.callout.d::after{content:"";position:absolute;border:8px solid transparent}
+  .callout.l::after{right:100%;top:50%;transform:translateY(-50%);border-right-color:var(--mark)}  /* arrow points left */
+  .callout.r::after{left:100%;top:50%;transform:translateY(-50%);border-left-color:var(--mark)}   /* arrow points right */
+  .callout.u::after{bottom:100%;left:50%;transform:translateX(-50%);border-bottom-color:var(--mark)}/* arrow points up */
+  .callout.d::after{top:100%;left:50%;transform:translateX(-50%);border-top-color:var(--mark)}    /* arrow points down */
+
+  /* drawn Windows dialogs (illustrations) */
+  .illus-label{display:block;text-align:right;margin-bottom:6px}
+  .ss{background:#0063b1;color:#fff;padding:26px 30px 22px;border-radius:6px;font-family:"Segoe UI",sans-serif;min-height:270px;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.25);position:relative}
+  .ss h5{font-size:24px;font-weight:300;margin:0 0 16px}
+  .ss p{margin:0 0 10px;font-size:14px;line-height:1.45}
+  .ss .lnk{text-decoration:underline;font-size:14px;width:max-content}
+  .ss .meta{font-size:14px;margin:6px 0 4px}
+  .ss .btns{margin-top:auto;display:flex;justify-content:flex-end;gap:8px;padding-top:18px}
+  .ss .btn{border:2px solid #fff;padding:5px 22px;font-size:14px;background:transparent;color:#fff}
+  .ss .btn.solid{background:#fff;color:#0063b1;font-weight:600}
+  .dlg{background:#fff;border:1px solid #cfcfcf;border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,.22);font-family:"Segoe UI",sans-serif;font-size:13.5px;overflow:hidden;position:relative}
+  .dlg .bar{background:#f3f3f3;padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e3e3e3;display:flex;justify-content:space-between}
+  .dlg .body{padding:16px 20px}
+  .dlg .body h6{font-size:16px;margin:0 0 10px;font-weight:600;color:#1a1a1a}
+  .dlg .row{display:flex;gap:10px;align-items:center;margin:6px 0}
+  .dlg .chk{width:15px;height:15px;border:1.5px solid #555;border-radius:3px;display:inline-grid;place-items:center;font-size:11px}
+  .dlg .chk.on{background:#0067c0;border-color:#0067c0;color:#fff}
+  .dlg .foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;background:#f7f7f7;border-top:1px solid #e6e6e6}
+  .dlg .b{padding:5px 18px;border:1px solid #bdbdbd;border-radius:4px;background:#fdfdfd}
+  .dlg .b.p{background:#0067c0;border-color:#0067c0;color:#fff}
+  .dl{background:#fff;border-radius:8px;border:1px solid #d8d8d8;box-shadow:0 12px 32px rgba(0,0,0,.18);font-family:"Segoe UI",sans-serif;font-size:13px;padding:14px 16px;position:relative}
+  .dl .warnico{color:#c5590a;font-weight:700}
+  .menu{background:#fff;border:1px solid #d6d6d6;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.18);width:250px;font-family:"Segoe UI",sans-serif;font-size:13.5px;padding:5px 0;position:relative}
+  .menu div{padding:6px 14px}
+  .menu .sel{background:#e5f1fb}
+  .menu hr{border:0;border-top:1px solid #e5e5e5;margin:4px 0}
+  .uac{background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.25);font-family:"Segoe UI",sans-serif;position:relative}
+  .uac .top{background:#1f3b63;color:#fff;padding:14px 18px;font-size:16px}
+  .uac .mid{padding:14px 18px;font-size:13.5px;color:#222}
+  .uac .bot{display:flex;gap:8px;padding:10px 18px 16px}
+  .uac .bot span{flex:1;text-align:center;padding:7px;border:1px solid #bbb;background:#f4f4f4}
+  .uac .bot span.p{background:#0067c0;color:#fff;border-color:#0067c0}
+
+  /* app-style banner (drawn, Windows-only banner) */
+  .appbanner{background:#2a241f;color:#efe7dc;border:1px solid #3d352d;border-radius:10px;padding:14px 16px;font-size:13.5px}
+  .appbanner .t{font-weight:700;font-size:15px;margin-bottom:4px;display:flex;gap:8px;align-items:center}
+  .appbanner .t::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dot,#9a8f82)}
+  .appbanner .s{color:#b9ad9f}
+  .appbanner .a{margin-top:10px;display:flex;gap:10px;align-items:center}
+  .appbanner .a span{padding:6px 12px;border-radius:7px;border:1px solid #4a4037;font-weight:600;font-size:13px}
+  .appbanner .a span.pri{background:#e8a65d;color:#1d1813;border-color:#e8a65d}
+  .appbanner .a span.lnk{border:0;color:#e8a65d;padding:0}
+
+  /* banner table */
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:15px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+  th,td{text-align:left;vertical-align:top;padding:11px 14px;border-top:1px solid var(--line)}
+  th{background:var(--th);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);border-top:0}
+  td.what{font-weight:600;width:28%}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px}
+
+  /* priority ladder */
+  .tier{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 22px 18px;margin:18px 0}
+  .tier > h3{margin-top:16px}
+  .setgrid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(280px,400px);gap:26px;align-items:start;padding:16px 0;border-top:1px dashed var(--line)}
+  .setgrid:first-of-type{border-top:0}
+  @media (max-width:1050px){.setgrid{grid-template-columns:1fr}}
+  .setgrid h4{margin:0 0 6px;font-size:17px}
+  .setgrid ul{margin:6px 0;padding-left:20px}
+  .setgrid li{margin:3px 0}
+
+  .diagram{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin:16px 0}
+  .faq dt{font-weight:700;margin-top:16px}
+  .faq dd{margin:4px 0 0 0;color:var(--ink2)}
+  footer{margin-top:70px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink3);font-size:13px}
+  @media print{nav.toc{display:none}.wrap{grid-template-columns:1fr}.hl.pulse{animation:none}h2{break-before:page}}
+</style>
+<script>
+  // Dark by default; the reader's choice is remembered on this computer.
+  (function(){var t='dark';try{t=localStorage.getItem('dyavon-guide-theme')||'dark'}catch(e){}
+  document.documentElement.setAttribute('data-theme',t)})();
+  function setTheme(t){document.documentElement.setAttribute('data-theme',t);
+    try{localStorage.setItem('dyavon-guide-theme',t)}catch(e){}
+    document.querySelectorAll('.theme-btn button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.t===t)})}
+  document.addEventListener('DOMContentLoaded',function(){setTheme(document.documentElement.getAttribute('data-theme'))});
+</script>
+</head>
+<body>
+<div class="theme-btn" role="group" aria-label="Colour theme">
+  <button type="button" data-t="dark" onclick="setTheme('dark')">🌙 Dark</button>
+  <button type="button" data-t="light" onclick="setTheme('light')">☀️ Light</button>
+</div>
+<div class="wrap">
+
+<nav class="toc">
+  <div class="brand">🖱️ Dyavon</div>
+  <div class="sub">User guide · version 1.0.0</div>
+  <a href="#quick">Quick start (1 minute read)</a>
+  <a href="#before">Before you start</a>
+  <h4>Basics</h4>
+  <a href="#download">1 · Download from GitHub</a>
+  <a href="#open">2 · Open it on Windows</a>
+  <a href="#linux">2b · Open it on Linux</a>
+  <a href="#pair">3 · Connect the two computers</a>
+  <a href="#use">4 · Use it</a>
+  <a href="#daily">5 · Every day after that</a>
+  <a href="#banners">Messages you may see</a>
+  <h4>Settings, by importance</h4>
+  <a href="#settings">Where Settings are</a>
+  <a href="#tier1">Worth doing once</a>
+  <a href="#tier2">Sometimes useful</a>
+  <a href="#tier3">Rarely needed</a>
+  <h4>Help</h4>
+  <a href="#trouble">If something doesn't work</a>
+  <a href="#report">Report a problem</a>
+</nav>
+
+<main>
+
+<h1>Share one mouse and keyboard between two computers</h1>
+<p class="lead">Dyavon lets you move your pointer off the edge of one screen and onto another computer, then type and copy-paste there, as if both were one computer. This guide walks a first-time user through everything, step by step, with the screens they'll see.</p>
+
+<!-- ================= QUICK START ================= -->
+<section id="quick" class="quick">
+  <div class="tag t-basic">THE WHOLE THING IN 5 STEPS</div>
+  <ol>
+    <li><div class="who">Both computers</div><b>Download</b> Dyavon from GitHub, extract it, and open it.</li>
+    <li><div class="who">The computer whose mouse you use</div>Choose <b>Shares its mouse</b> → press <b>Pair a new device</b>. A 6-digit code appears.</li>
+    <li><div class="who">The other computer</div>Choose <b>Is controlled</b> → type the 6-digit code → press <b>Pair</b>.</li>
+    <li><div class="who">Done</div>Both say <b>Connected</b>. Push your pointer past the screen edge and it appears on the other computer. Copy on one, paste on the other.</li>
+    <li><div class="who">Recommended, once</div>Settings → Startup → turn on <b>Start at login</b> on both, so you never have to open it by hand again.</li>
+  </ol>
+  <div class="tip" style="margin-bottom:0"><b>The code is a one-time thing.</b> You pair once. After that, the two computers find and trust each other by themselves, every day, even after a restart.</div>
+</section>
+
+<!-- ================= BEFORE ================= -->
+<h2 id="before">Before you start</h2>
+<p>Only four things matter:</p>
+<div class="pair">
+  <div class="side"><h4>✅ Same network</h4>Both computers on the same home or office network: the same Wi-Fi router, or a cable between them. It doesn't work over the internet.</div>
+  <div class="side"><h4>✅ Supported systems</h4><b>Windows 10 or 11</b> (64-bit), or <b>Linux</b> with an X11 desktop. Any mix works: Windows ↔ Linux, either way round.</div>
+  <div class="side"><h4>✅ Dyavon on both</h4>The same version on both computers. You download it twice (or copy the folder over).</div>
+  <div class="side"><h4>✅ Know which is which</h4>The computer whose <b>physical mouse and keyboard</b> you'll use is the one that <b>Shares its mouse</b>. The other <b>Is controlled</b>.</div>
+</div>
+<div class="diagram">
+  <svg viewBox="0 0 760 210" width="100%" role="img" aria-label="Desk diagram">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e8590c"/></marker></defs>
+    <rect x="30" y="20" width="260" height="150" rx="10" class="d-a" stroke-width="2"/>
+    <text x="160" y="58" text-anchor="middle" font-size="19" font-weight="700" class="d-ink">Laptop</text>
+    <text x="160" y="84" text-anchor="middle" font-size="14" class="d-ink2">Is controlled</text>
+    <text x="160" y="108" text-anchor="middle" font-size="13" class="d-ink3">no mouse needed here</text>
+    <rect x="470" y="20" width="260" height="150" rx="10" class="d-g" stroke-width="2"/>
+    <text x="600" y="58" text-anchor="middle" font-size="19" font-weight="700" class="d-ink">Office-PC</text>
+    <text x="600" y="84" text-anchor="middle" font-size="14" class="d-ink2">Shares its mouse</text>
+    <text x="600" y="108" text-anchor="middle" font-size="13" class="d-ink3">your real mouse + keyboard</text>
+    <path d="M470,135 C420,135 340,135 292,135" stroke="#e8590c" stroke-width="3" fill="none" marker-end="url(#ar)"/>
+    <text x="381" y="125" text-anchor="middle" font-size="13" fill="#e8590c" font-weight="700">push past the edge</text>
+    <text x="381" y="200" text-anchor="middle" font-size="13" class="d-ink3">These names are just examples: Dyavon shows each computer's own name.</text>
+  </svg>
+</div>
+
+<!-- ================= DOWNLOAD ================= -->
+<h2 id="download">1 · Download from GitHub <span class="tag t-basic">BASIC</span></h2>
+<p>Do this on <b>both</b> computers. No account and no sign-in needed.</p>
+
+<div class="step wide">
+  <div>
+    <ol class="marks">
+      <li><span class="n">1</span>Open <a href="https://github.com/prashantpal8980/dyavon">github.com/prashantpal8980/dyavon</a>.</li>
+      <li><span class="n">2</span>On the right, under <b>Releases</b>, click <b>Dyavon 1.0.0 <span class="tag t-basic">Latest</span></b>.</li>
+    </ol>
+    <p class="small muted">Ignore the list of folders in the middle. That's the source code, for developers.</p>
+  </div>
+  <figure>
+    <div class="shot">
+      <img src="img/github-repo.png" alt="GitHub project page">
+      <div class="hl pulse" style="left:75.6%;top:93.75%;width:15.6%;height:4.8%"></div>
+      <span class="n" style="left:74.4%;top:96.1%">2</span>
+      <span class="callout r" style="right:26.5%;top:93.9%">Click the release</span>
+      <div class="hl" style="left:1.8%;top:17.2%;width:15%;height:3.9%"></div>
+      <span class="n" style="left:18.4%;top:19.2%">1</span>
+    </div>
+    <figcaption>The project page on GitHub (real screenshot).</figcaption>
+  </figure>
+</div>
+
+<div class="step wide">
+  <div>
+    <ol class="marks">
+      <li><span class="n">3</span>Scroll down to <b>Assets</b>. Nine files are listed. You need only <b>one</b>:
+        <ul>
+          <li><b>Windows:</b> <code>dyavon-1.0.0-windows-x86_64.zip</code></li>
+          <li><b>Linux:</b> <code>dyavon-1.0.0-linux-x86_64.tar.gz</code></li>
+        </ul>
+      </li>
+    </ol>
+    <p class="small muted">The other files (<code>latest.json</code>, <code>dyavon.exe</code>, <code>SHA256SUMS</code>…) are used by Dyavon's automatic updates. You can ignore them.</p>
+  </div>
+  <figure>
+    <div class="shot">
+      <img src="img/github-release.png" alt="GitHub release page with download files">
+      <div class="hl pulse" style="left:4.4%;top:85.5%;width:91.2%;height:3.4%"></div>
+      <span class="callout u" style="left:12%;top:89.8%">Windows: download this</span>
+      <span class="n" style="left:3%;top:87.2%">3</span>
+      <div class="hl" style="left:4.4%;top:82.1%;width:91.2%;height:3.3%;border-style:dashed;border-color:#3f8f5a;box-shadow:none"></div>
+      <span class="callout l" style="left:97%;top:83.8%;background:#3f8f5a;transform:translateX(-100%)">Linux: this one</span>
+    </div>
+    <figcaption style="margin-top:44px">The release page (real screenshot). The install notes at the top say the same as this guide.</figcaption>
+  </figure>
+</div>
+
+<!-- ================= OPEN ON WINDOWS ================= -->
+<h2 id="open">2 · Open it on Windows <span class="tag t-win">WINDOWS</span></h2>
+<p>Windows shows up to three warnings the first time. They're normal for a new free app that isn't code-signed yet. Here's each one and what to click.</p>
+
+<div class="step">
+  <div>
+    <h3 style="margin-top:0">a) "Isn't commonly downloaded" <span class="tag t-rare">SOMETIMES</span></h3>
+    <p>Some browsers, mostly <b>Microsoft Edge</b>, hold the download back because few people have downloaded this file yet.</p>
+    <ol class="marks">
+      <li><span class="n">1</span>Hover the download and click <b>⋯</b> (or "Keep").</li>
+      <li><span class="n">2</span>Click <b>Keep</b>. If Edge asks again, click <b>Show more → Keep anyway</b>.</li>
+    </ol>
+    <p class="small muted">Chrome and Firefox usually download it without asking.</p>
+  </div>
+  <figure>
+    <span class="illus-label"><span class="tag t-illus">DRAWN ILLUSTRATION</span></span>
+    <div class="dl">
+      <div style="font-weight:600;margin-bottom:6px">Downloads</div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span class="warnico">⚠</span>
+        <div style="flex:1"><b>dyavon-1.0.0-windows-x86_64.zip</b> isn't commonly downloaded. Make sure you trust dyavon-1.0.0-windows-x86_64.zip before you open it.
+          <div style="margin-top:10px;display:flex;gap:8px"><span class="tgt" style="border:1px solid #bbb;padding:3px 14px;border-radius:4px">Keep</span><span style="border:1px solid #bbb;padding:3px 14px;border-radius:4px">Delete</span><span class="n inl">2</span></div>
+        </div>
+        <span class="tgt" style="font-weight:700;padding:0 4px">⋯</span><span class="n inl" style="margin-left:6px">1</span>
+      </div>
+    </div>
+  </figure>
+</div>
+
+<div class="step">
+  <div>
+    <h3 style="margin-top:0">b) Extract the zip <span class="tag t-basic">ALWAYS</span></h3>
+    <ol class="marks">
+      <li><span class="n">1</span>Open your <b>Downloads</b> folder.</li>
+      <li><span class="n">2</span>Right-click <code>dyavon-1.0.0-windows-x86_64.zip</code> → <b>Extract All…</b> → <b>Extract</b>.</li>
+      <li><span class="n">3</span>A new folder opens. Double-click <b>dyavon.exe</b>.</li>
+    </ol>
+    <div class="warn"><b>Don't run it from inside the zip.</b> Opening the zip shows <code>dyavon.exe</code>, but Windows would run it from a temporary folder, and your settings may not stick. Always <b>Extract All</b> first.</div>
+    <div class="tip"><b>Tip: give it a permanent home.</b> Move the extracted folder somewhere you won't delete by accident, e.g. <code>Documents\dyavon</code>, <i>before</i> turning on "Start at login". Dyavon is a "portable" app: there's no installer, and the folder <i>is</i> the app.</div>
+  </div>
+  <figure>
+    <span class="illus-label"><span class="tag t-illus">DRAWN ILLUSTRATION</span></span>
+    <div class="menu">
+      <div>Open</div>
+      <div class="sel tgt" style="outline-offset:-2px"><b>Extract All…</b></div>
+      <div>Pin to Quick access</div>
+      <hr><div>Compress to…</div><div>Copy as path</div><hr><div>Properties</div>
+      <span class="callout l" style="left:262px;top:36px">Extract All…</span>
+    </div>
+  </figure>
+</div>
+
+<div class="step">
+  <div>
+    <h3 style="margin-top:0">c) "Windows protected your PC" <span class="tag t-once">FIRST RUN ONLY</span></h3>
+    <p>A blue screen appears the first time you open <code>dyavon.exe</code>. This is Microsoft SmartScreen. It says <b>Unknown publisher</b> because the app isn't code-signed yet. That doesn't mean it's harmful.</p>
+    <ol class="marks">
+      <li><span class="n">1</span>Click the small <b>More info</b> link. The "Run anyway" button is hidden until you do.</li>
+      <li><span class="n">2</span>Click <b>Run anyway</b>.</li>
+    </ol>
+    <p class="small muted">Windows remembers this. You won't see it again for this copy.</p>
+  </div>
+  <figure>
+    <span class="illus-label"><span class="tag t-illus">DRAWN ILLUSTRATION</span></span>
+    <div class="ss">
+      <h5>Windows protected your PC</h5>
+      <p>Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk.</p>
+      <div><span class="lnk tgt" style="outline-color:#ffb37a">More info</span><span class="n inl">1</span></div>
+      <div class="btns"><span class="btn">Don't run</span></div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="ss">
+      <h5>Windows protected your PC</h5>
+      <p>Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk.</p>
+      <div class="meta">App: &nbsp; dyavon.exe<br>Publisher: &nbsp; Unknown publisher</div>
+      <div class="btns"><span class="n inl" style="margin:0 6px 0 0;align-self:center">2</span><span class="btn solid tgt" style="outline-color:#ffb37a">Run anyway</span><span class="btn">Don't run</span></div>
+    </div>
+  </figure>
+</div>
+
+<div class="step">
+  <div>
+    <h3 style="margin-top:0">d) Windows Firewall <span class="tag t-once">FIRST TIME IT CONNECTS</span></h3>
+    <p>When Dyavon first starts sharing, Windows asks whether it may use the network. It needs this to talk to your other computer.</p>
+    <ol class="marks">
+      <li><span class="n">1</span>Leave <b>Private networks</b> ticked. That's your home or office network.</li>
+      <li><span class="n">2</span>Click <b>Allow access</b>. Windows may ask for an administrator's permission.</li>
+    </ol>
+    <div class="warn"><b>If you clicked Cancel by mistake,</b> the other computer can't reach this one. In Windows Search type <b>"Allow an app through Windows Firewall"</b>, click <b>Change settings</b>, find <b>Dyavon</b> and tick <b>Private</b>.</div>
+  </div>
+  <figure>
+    <span class="illus-label"><span class="tag t-illus">DRAWN ILLUSTRATION</span></span>
+    <div class="dlg">
+      <div class="bar"><span>Windows Security Alert</span><span>✕</span></div>
+      <div class="body">
+        <h6>Windows Defender Firewall has blocked some features of this app</h6>
+        <div class="muted" style="font-size:12.5px;margin-bottom:8px">Name: dyavon.exe &nbsp;·&nbsp; Publisher: Unknown</div>
+        <div>Allow dyavon.exe to communicate on these networks:</div>
+        <div class="row"><span class="tgt" style="display:flex;gap:10px;align-items:center;padding:0 4px"><span class="chk on">✓</span>Private networks, such as my home or work network</span><span class="n inl">1</span></div>
+        <div class="row"><span class="chk"></span>Public networks, such as those in airports and cafés</div>
+      </div>
+      <div class="foot"><span class="n inl" style="margin:0 4px 0 0;align-self:center">2</span><span class="b p tgt">Allow access</span><span class="b">Cancel</span></div>
+    </div>
+  </figure>
+</div>
+
+<div class="step">
+  <div>
+    <h3 style="margin-top:0">e) "Running with normal permissions" <span class="tag t-once">ONE-TIME MESSAGE</span></h3>
+    <p>A grey message at the top of the Dyavon window. It's only information: everything works normally. The one exception is that, while a Windows <i>administrator</i> window is in front (an installer, or a "Do you want to allow…" prompt), the pointer can't cross until you click elsewhere.</p>
+    <ol class="marks"><li><span class="n">1</span>Click <b>Keep normal</b>. That's right for almost everyone.</li></ol>
+    <p class="small muted">If that exception bothers you later, see <a href="#tier3">Run as administrator</a> under "Rarely needed".</p>
+  </div>
+  <figure>
+    <span class="illus-label"><span class="tag t-illus">DRAWN IN THE APP'S STYLE</span></span>
+    <div class="appbanner" style="position:relative">
+      <div class="t">Running with normal permissions</div>
+      <div class="s">Fine for everyday use. While an administrator window is in front (an installer or a permission prompt), Windows hides the mouse from Dyavon, so the pointer can't cross until you click away.</div>
+      <div class="a"><span>Restart as administrator</span><span class="lnk tgt" style="padding:2px 6px">Keep normal</span><span class="n inl" style="margin-left:0">1</span></div>
+    </div>
+  </figure>
+</div>
+
+<!-- ================= LINUX ================= -->
+<h2 id="linux">2b · Open it on Linux <span class="tag t-rare">LINUX</span></h2>
+<div class="step wide"><div>
+  <ol class="marks">
+    <li><span class="n">1</span>Extract <code>dyavon-1.0.0-linux-x86_64.tar.gz</code>: right-click → <b>Extract Here</b>, or <code>tar xzf dyavon-1.0.0-linux-x86_64.tar.gz</code>.</li>
+    <li><span class="n">2</span>In the new folder, run <code>./run.sh</code>.</li>
+    <li><span class="n">3</span>If it says a library is missing, install it once: <code>sudo apt install libgtk-3-0 libayatana-appindicator3-1</code>.</li>
+  </ol>
+  <div class="note"><b>Wayland isn't supported yet.</b> Log in with an <b>X11</b> session (on the login screen, the gear icon → "GNOME on Xorg", "Plasma (X11)" or similar). There are no SmartScreen or firewall prompts on Linux.</div>
+</div></div>
+
+<!-- ================= PAIR ================= -->
+<h2 id="pair">3 · Connect the two computers <span class="tag t-basic">BASIC · ONCE</span></h2>
+<p>This is the only real setup, and it takes about a minute. Keep both Dyavon windows open, side by side if you can.</p>
+
+<h3>On the computer whose mouse you use ("Office-PC" in these pictures)</h3>
+<div class="step">
+  <div>
+    <p>The window opens on <b>"Let's connect a second computer"</b>.</p>
+    <ol class="marks">
+      <li><span class="n">1</span>Choose <b>Shares its mouse</b>. It's already picked the first time; it has an orange border when chosen.</li>
+      <li><span class="n">2</span>Press <b>Pair a new device</b>.</li>
+    </ol>
+    <p class="small muted">Here Windows may show the firewall question from step 2d: click <b>Allow access</b>.</p>
+  </div>
+  <figure>
+    <div class="shot win">
+      <img src="img/first-run.png" alt="First run, choose role">
+      <div class="hl" style="left:9.3%;top:46.4%;width:43.2%;height:10.6%"></div>
+      <span class="n" style="left:9.6%;top:46.6%">1</span>
+      <div class="hl pulse" style="left:71%;top:63%;width:25.8%;height:4.8%"></div>
+      <span class="n" style="left:70%;top:65.4%">2</span>
+      <span class="callout d" style="left:83.9%;top:55.6%;transform:translateX(-50%)">Press this</span>
+    </div>
+    <figcaption>First start, "Office-PC" (real screenshot)</figcaption>
+  </figure>
+</div>
+
+<div class="step">
+  <div>
+    <p>A big <b>6-digit code</b> appears. Leave this window as it is and go to the other computer.</p>
+    <ul>
+      <li>The code is valid for <b>5 minutes</b> and works <b>once</b>.</li>
+      <li>If it runs out, press <b>Pair a new device</b> again for a fresh code.</li>
+      <li>The status at the top reads <b>"Waiting for the other computer…"</b>, which is expected.</li>
+    </ul>
+  </div>
+  <figure>
+    <div class="shot win">
+      <img src="img/server-code.png" alt="Pairing code shown">
+      <div class="hl pulse" style="left:9.2%;top:65.5%;width:36%;height:8.6%"></div>
+      <span class="callout l" style="left:48%;top:67.6%">Type this on the other computer</span>
+      <div class="hl" style="left:9.2%;top:75.4%;width:27%;height:3.4%;border-style:dashed;box-shadow:none"></div>
+    </div>
+    <figcaption>The pairing code (real screenshot)</figcaption>
+  </figure>
+</div>
+
+<h3>On the other computer ("Laptop")</h3>
+<div class="step">
+  <div>
+    <ol class="marks">
+      <li><span class="n">1</span>Choose <b>Is controlled</b>.</li>
+      <li><span class="n">2</span>A message <b>"Protect this computer with a PIN"</b> appears. For now, click <b>Not now</b>. You can add a PIN later (see <a href="#tier2">Sometimes useful</a>).</li>
+    </ol>
+  </div>
+  <figure>
+    <div class="shot win">
+      <img src="img/client-pin-banner.png" alt="Client role chosen; PIN suggestion">
+      <div class="hl" style="left:53.9%;top:63.6%;width:42.6%;height:11.2%"></div>
+      <span class="n" style="left:96.4%;top:63.8%">1</span>
+      <div class="hl pulse" style="left:23.2%;top:44.1%;width:15.3%;height:5%"></div>
+            <span class="callout u" style="left:30.8%;top:51.5%;transform:translateX(-50%)">2 · Not now</span>
+    </div>
+    <figcaption>"Is controlled" chosen; the PIN suggestion appears (real screenshot)</figcaption>
+  </figure>
+</div>
+
+<div class="step">
+  <div>
+    <ol class="marks" start="3">
+      <li><span class="n">3</span>Click the <b>first box</b> under "Pair with its code" and type the 6 digits shown on the other computer.</li>
+      <li><span class="n">4</span>Press <b>Pair</b>.</li>
+    </ol>
+    <p>You <b>don't</b> need to fill in the address box in step 2. The two computers find each other by themselves.</p>
+    <div class="note"><b>Only if pairing says "no server found":</b> press <b>Detect</b> and click <b>Use</b> next to what it finds. Or type the other computer's address: it's shown on that computer under <b>Connection details</b> (e.g. <code>192.168.1.20</code>). Then press <b>Pair</b> again.</div>
+  </div>
+  <figure>
+    <div class="shot win">
+      <img src="img/client-code-typed.png" alt="Code typed in">
+      <div class="hl" style="left:9.3%;top:74%;width:45.5%;height:6%"></div>
+      <span class="n" style="left:8.6%;top:73.8%">3</span>
+      <div class="hl pulse" style="left:86.4%;top:74.4%;width:10.2%;height:5%"></div>
+      <span class="n" style="left:96.8%;top:74.2%">4</span>
+      <div class="hl" style="left:83.6%;top:62.8%;width:13%;height:5%;border-style:dashed;border-color:#8a8076;box-shadow:none"></div>
+      <span class="callout d" style="left:90.1%;top:57.2%;transform:translateX(-50%);background:#8a8076">only if needed</span>
+    </div>
+    <figcaption>Code typed, ready to Pair (real screenshot)</figcaption>
+  </figure>
+</div>
+
+<div class="good"><b>🎉 That's the setup done, for good.</b> A few seconds later both windows turn to <b>Connected</b>. You won't need the code again, even after restarting either computer.</div>
+
+<!-- ================= USE ================= -->
+<h2 id="use">4 · Use it <span class="tag t-basic">BASIC</span></h2>
+<div class="pair">
+  <figure>
+    <div class="shot win">
+      <img src="img/server-connected.png" alt="Server connected">
+      <div class="hl" style="left:70.7%;top:2.2%;width:17.9%;height:3.4%"></div>
+      <span class="n" style="left:69.6%;top:3.8%">1</span>
+      <div class="hl pulse" style="left:5.2%;top:13.4%;width:56%;height:3.2%"></div>
+      <span class="n" style="left:63.6%;top:15%">2</span>
+      <div class="hl" style="left:3.6%;top:70.8%;width:92.9%;height:16.6%;border-style:dashed;box-shadow:none"></div>
+      <span class="n" style="left:97.5%;top:71%">4</span>
+    </div>
+    <figcaption>Office-PC (Shares its mouse), connected</figcaption>
+  </figure>
+  <figure>
+    <div class="shot win">
+      <img src="img/client-connected.png" alt="Client connected">
+      <div class="hl" style="left:70.7%;top:2.2%;width:17.9%;height:3.4%"></div>
+      <span class="n" style="left:69.6%;top:3.8%">1</span>
+      <div class="hl pulse" style="left:3.6%;top:65.6%;width:92.9%;height:6%"></div>
+      <span class="n" style="left:97.5%;top:65.8%">3</span>
+    </div>
+    <figcaption>Laptop (Is controlled), connected</figcaption>
+  </figure>
+</div>
+<ol class="marks" style="list-style:none;padding:0">
+  <li style="position:relative;padding:6px 0 6px 38px"><span class="n" style="position:absolute;left:0;top:6px">1</span><b>Connected</b> (green dot) means it's working. <span class="muted">Grey "Not set up" or orange "Waiting…" means it isn't connected yet.</span></li>
+  <li style="position:relative;padding:6px 0 6px 38px"><span class="n" style="position:absolute;left:0;top:6px">2</span><b>Move to the other computer:</b> push your pointer past the edge it names, e.g. <i>"Push past the left edge to use Laptop"</i>. Your keyboard follows the pointer. Move back the same way.</li>
+  <li style="position:relative;padding:6px 0 6px 38px"><span class="n" style="position:absolute;left:0;top:6px">3</span><b>Emergency exit:</b> press <kbd>Scroll Lock</kbd> at any time to bring the pointer and keyboard straight home. It always works, even if the network drops. <span class="muted">(Laptops without Scroll Lock: change the key in Settings → Keyboard &amp; hotkeys.)</span></li>
+  <li style="position:relative;padding:6px 0 6px 38px"><span class="n" style="position:absolute;left:0;top:6px">4</span>Your paired computers. With more than one, you can jump straight to one with <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>number</kbd>.</li>
+</ol>
+
+<div class="note"><b>Is the other computer on the wrong side?</b> If your laptop sits on your <i>right</i> but Dyavon expects it on the left, open <b>Settings → Screens &amp; edges</b> and click the edge where it really is (see <a href="#tier1">Worth doing once</a>).</div>
+
+<h3>Copy and paste between the computers</h3>
+<div class="step">
+  <div>
+    <p>Just copy as usual (<kbd>Ctrl</kbd>+<kbd>C</kbd>) on one computer, move across, and paste (<kbd>Ctrl</kbd>+<kbd>V</kbd>) on the other. It works for <b>text, images, files and folders</b>.</p>
+    <ol class="marks">
+      <li><span class="n">1</span>The <b>Clipboard</b> tab lists what you copied recently. The number is how many items.</li>
+      <li><span class="n">2</span><b>Click any item</b> to copy it again. <b>Pin</b> keeps it at the top, and <b>×</b> removes it.</li>
+    </ol>
+    <p class="small muted">"Sent" means it was copied on this computer; "Received" means it came from the other one.</p>
+    <div class="note"><b>Big files (over 16 MB)</b> aren't copied across until you ask. A message "<i>… is ready to paste</i>" appears with a <b>Bring it over</b> button. Pasting also works directly: it waits until the whole file has arrived.</div>
+  </div>
+  <figure>
+    <div class="shot win">
+      <img src="img/clipboard.png" alt="Clipboard history">
+      <div class="hl" style="left:20.4%;top:34%;width:16%;height:5.4%"></div>
+      <span class="n" style="left:38.8%;top:36.4%">1</span>
+      <div class="hl pulse" style="left:3.6%;top:49%;width:92.9%;height:16.6%"></div>
+      <span class="n" style="left:97.6%;top:49%">2</span>
+    </div>
+    <figcaption>Clipboard tab (real screenshot)</figcaption>
+  </figure>
+</div>
+
+<!-- ================= DAILY ================= -->
+<h2 id="daily">5 · Every day after that <span class="tag t-basic">BASIC</span></h2>
+<div class="pair">
+  <div class="side"><h4>Without "Start at login"</h4>Open <code>dyavon.exe</code> on both computers. They reconnect by themselves within a few seconds. No code, no clicks.</div>
+  <div class="side" style="border-color:var(--tip-line);background:var(--good-soft)"><h4>With "Start at login" (recommended)</h4>Nothing at all. Turn the computers on, log in, and the pointer can cross. <a href="#tier1">How to turn it on →</a></div>
+</div>
+<p><b>Closing the window:</b> the <b>×</b> or <b>⋯ → Quit Dyavon</b> fully stops it, and sharing ends. <b>Stop sharing</b> (bottom-right) pauses sharing but keeps the window open.</p>
+<p><b>Updates:</b> when a new version comes out, a message <b>"Version x.y is available"</b> appears with an <b>Update</b> button. One click downloads it and checks that it really comes from Dyavon; then <b>Restart Dyavon</b>. Update <b>both</b> computers.</p>
+
+<!-- ================= BANNERS ================= -->
+<h2 id="banners">Messages you may see</h2>
+<p>Dyavon never pops up windows over your work. Messages appear as a strip at the top of its own window. Here's every one a normal user may meet:</p>
+<table>
+  <tr><th>Message</th><th>What it means</th><th>What to do</th></tr>
+  <tr><td class="what"><span class="dot" style="background:#e8a65d"></span>Protect this computer with a PIN</td><td>Suggestion on the computer that <i>is controlled</i>. A PIN adds a second lock: even a paired computer must type it to take control.</td><td><b>Not now</b> is fine at home. <b>Set a PIN</b> for offices or shared networks. <b>Don't ask again</b> hides it for good.</td></tr>
+  <tr><td class="what"><span class="dot" style="background:#9a8f82"></span>Running with normal permissions <span class="tag t-win">WIN</span></td><td>Information only. Admin windows (installers, UAC prompts) block crossing while they're in front.</td><td><b>Keep normal</b>.</td></tr>
+  <tr><td class="what"><span class="dot" style="background:#d9893a"></span>A computer is asking to control this one</td><td>The other computer is connecting, and this one has a PIN.</td><td>Type <i>this</i> computer's PIN on the other computer, in the box that appeared there.</td></tr>
+  <tr><td class="what"><span class="dot" style="background:#e8a65d"></span><i>file</i> is ready to paste</td><td>The other computer copied a large file (over 16 MB).</td><td><b>Bring it over</b> to fetch it now, or just paste: the paste waits for it. <b>Always allow up to … MB</b> raises the limit.</td></tr>
+  <tr><td class="what"><span class="dot" style="background:#e8a65d"></span>Restart needed</td><td>You changed a setting that applies when sharing restarts.</td><td><b>Restart sharing now</b> (takes a second).</td></tr>
+  <tr><td class="what"><span class="dot" style="background:#e8a65d"></span>Version x.y is available</td><td>A newer Dyavon exists.</td><td><b>Update</b>, or <b>Later</b>.</td></tr>
+  <tr><td class="what"><span class="dot" style="background:#3f8f5a"></span>Version x.y is installed</td><td>The update downloaded and was verified.</td><td><b>Restart Dyavon</b> now, or it applies the next time it starts.</td></tr>
+  <tr><td class="what"><span class="dot" style="background:#b5651d"></span>The update did not install</td><td>Download or check failed. Nothing was changed.</td><td><b>Open download page</b> takes you to GitHub to get it by hand.</td></tr>
+</table>
+
+<!-- ================= SETTINGS ================= -->
+<h2 id="settings">Settings, by importance</h2>
+<p>You don't need any of these to start: the defaults are chosen for a normal home setup. They're listed below in the order you're likely to care about them.</p>
+<div class="step">
+  <div>
+    <ol class="marks">
+      <li><span class="n">1</span>Click <b>⋯</b> at the top-right of the window.</li>
+      <li><span class="n">2</span>Click <b>Settings</b>.</li>
+    </ol>
+    <p>Settings is a list of categories, like a phone's Settings app. Every change <b>saves automatically</b>; there's no Save button. The <b>←</b> arrow goes back.</p>
+    <p>Each page ends with a folded <b>▸ Advanced</b> section. Most people never open those.</p>
+    <p class="small">Legend:&nbsp; <span class="tag t-once">WORTH DOING ONCE</span> &nbsp;<span class="tag t-adv">SOMETIMES</span> &nbsp;<span class="tag t-rare">RARELY</span></p>
+  </div>
+  <figure>
+    <div class="shot win">
+      <img src="img/menu.png" alt="The ⋯ menu">
+      <div class="hl" style="left:89.6%;top:1.6%;width:7.4%;height:4.4%"></div>
+      <span class="n" style="left:86.4%;top:3.8%">1</span>
+      <div class="hl pulse" style="left:54.4%;top:7.6%;width:42.4%;height:5%"></div>
+      <span class="n" style="left:53%;top:10.2%">2</span>
+    </div>
+    <figcaption>The ⋯ menu (real screenshot)</figcaption>
+  </figure>
+</div>
+<div class="step flip">
+  <figure>
+    <div class="shot win"><img src="img/settings.png" alt="Settings categories"></div>
+    <figcaption>Settings home (real screenshot)</figcaption>
+  </figure>
+  <div>
+    <h3 style="margin-top:0">Map of Settings, by how often people need it</h3>
+    <table>
+      <tr><th>Page</th><th>Importance</th></tr>
+      <tr><td>Startup</td><td><span class="tag t-once">WORTH DOING ONCE</span></td></tr>
+      <tr><td>Screens &amp; edges</td><td><span class="tag t-once">WORTH DOING ONCE</span> if the side is wrong</td></tr>
+      <tr><td>Clipboard</td><td><span class="tag t-adv">SOMETIMES</span></td></tr>
+      <tr><td>Security &amp; pairing</td><td><span class="tag t-adv">SOMETIMES</span></td></tr>
+      <tr><td>Keyboard &amp; hotkeys</td><td><span class="tag t-adv">SOMETIMES</span></td></tr>
+      <tr><td>Appearance</td><td><span class="tag t-adv">SOMETIMES</span>, just for looks</td></tr>
+      <tr><td>Connection</td><td><span class="tag t-rare">RARELY</span></td></tr>
+      <tr><td>Diagnostics · About</td><td><span class="tag t-rare">RARELY</span>, for problems and resets</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- tier 1 -->
+<div class="tier" id="tier1">
+  <h3><span class="tag t-once">WORTH DOING ONCE</span>&nbsp; Two settings that make it effortless</h3>
+
+  <div class="setgrid">
+    <div>
+      <h4>Startup → Start at login</h4>
+      <p>Turn this on (on <b>both</b> computers) and Dyavon starts by itself whenever you log in. This is the one setting almost everyone should change.</p>
+      <ul>
+        <li><b>Start at login</b>: on. <span class="muted">On Windows, the line underneath says "Adds a per-user entry under the Windows Run key".</span></li>
+        <li><b>Start minimized</b>: on if you don't want the window to open each time. It waits in the system tray (bottom-right, by the clock); click the icon to show it.</li>
+        <li><b>Start sharing automatically</b>: already on; leave it on.</li>
+      </ul>
+      <div class="warn"><b>Windows:</b> move the Dyavon folder to its permanent place <i>first</i>. If you move it later, turn Start at login off and on again.</div>
+    </div>
+    <figure>
+      <div class="shot win"><img src="img/set-startup.png" alt="Startup settings">
+        <div class="hl pulse" style="left:85.2%;top:48.4%;width:9.8%;height:9%"></div>
+        <span class="callout l" style="left:98%;top:50%">turn on</span>
+      </div>
+      <figcaption>Settings → Startup (real screenshot, Linux; Windows adds a "Windows only" section below)</figcaption>
+    </figure>
+  </div>
+
+  <div class="setgrid">
+    <div>
+      <h4>Screens &amp; edges: where the other computer sits</h4>
+      <p>Tells Dyavon which side of your screen the other computer is on, so pushing the pointer that way crosses over.</p>
+      <ul>
+        <li>The picture shows both screens. The orange bar is the edge you leave from.</li>
+        <li><b>Click the edge</b> of <i>this</i> computer where the pointer should leave, and the edge of the other where it should appear.</li>
+        <li>The line underneath confirms it in words, e.g. "Leaves Office-PC at its left edge, appears on Laptop's right edge."</li>
+      </ul>
+    </div>
+    <figure>
+      <div class="shot win"><img src="img/set-screens.png" alt="Screens and edges">
+        <div class="hl pulse" style="left:52%;top:39.5%;width:2.8%;height:22.5%"></div>
+        <span class="callout d" style="left:53.4%;top:24%;transform:translateX(-50%)">click an edge</span>
+      </div>
+      <figcaption>Settings → Screens &amp; edges (real screenshot)</figcaption>
+    </figure>
+  </div>
+</div>
+
+<!-- tier 2 -->
+<div class="tier" id="tier2">
+  <h3><span class="tag t-adv">SOMETIMES</span>&nbsp; Change these when you have a reason</h3>
+
+  <div class="setgrid">
+    <div>
+      <h4>Clipboard: what's shared, and big files</h4>
+      <ul>
+        <li><b>Sync clipboard</b>: the master switch for copy-paste between computers.</li>
+        <li><b>What to share</b>: untick Text, Images or Files if you don't want one of them shared.</li>
+        <li><b>Tell me when a file is waiting</b>: a desktop notification for big files.</li>
+        <li><b>Ask before bringing over files larger than 16 MB</b>: raise it (e.g. 500) if you often copy videos or big folders and don't want to be asked.</li>
+        <li><b>Save received files to</b>: leave empty to paste wherever you like. Pick a folder only if files should land there automatically.</li>
+        <li><b>Keep 25 items</b>: how long the Clipboard tab's history is.</li>
+        <li><b>Keep history after restart</b>: off by default, because it writes what you copied (maybe passwords) to disk.</li>
+      </ul>
+    </div>
+    <figure><div class="shot win"><img src="img/set-clipboard.png" alt="Clipboard settings">
+      <div class="hl pulse" style="left:3.6%;top:47.6%;width:92.9%;height:8.6%"></div>
+      <span class="callout l" style="left:99%;top:49.6%">16 MB limit</span>
+    </div><figcaption>Settings → Clipboard (real screenshot)</figcaption></figure>
+  </div>
+
+  <div class="setgrid">
+    <div>
+      <h4>Security &amp; pairing: PIN, new devices, removing</h4>
+      <ul>
+        <li><b>Pair a new device</b>: shows a fresh code, for a third computer or after reinstalling one.</li>
+        <li><b>Connection PIN</b>: set on the computer that <i>is controlled</i>. The other computer must then type it once each time Dyavon starts. Recommended on office or shared networks.</li>
+        <li><b>Paired computers → Remove</b>: forget a computer, e.g. one you sold. It's cut off immediately and needs a new code to come back.</li>
+      </ul>
+      <p class="small muted">All connections are encrypted whether or not you set a PIN.</p>
+    </div>
+    <figure><div class="shot win"><img src="img/set-security.png" alt="Security settings"></div><figcaption>Settings → Security &amp; pairing (real screenshot)</figcaption></figure>
+  </div>
+
+  <div class="setgrid">
+    <div>
+      <h4>Keyboard &amp; hotkeys</h4>
+      <ul>
+        <li><b>Take control back</b>: the emergency key, <kbd>Scroll Lock</kbd> by default. <b>Change it</b> if your keyboard has no Scroll Lock (many laptops): press <b>Change</b>, then the key you want.</li>
+        <li><b>Switch between computers</b>: shortcuts to jump straight to a computer. Useful with three or more.</li>
+      </ul>
+    </div>
+    <figure><div class="shot win"><img src="img/set-keys.png" alt="Keyboard settings"></div><figcaption>Settings → Keyboard &amp; hotkeys (real screenshot)</figcaption></figure>
+  </div>
+
+  <div class="setgrid">
+    <div>
+      <h4>Appearance</h4>
+      <p>Six colour themes (Graphite, Amber, Plum &amp; Cream, Forest &amp; Mint, Slate &amp; Sand, Porcelain). <b>Match system light / dark</b> follows your Windows or Linux dark mode. Purely cosmetic.</p>
+    </div>
+    <figure><div class="shot win"><img src="img/set-appearance.png" alt="Appearance"></div><figcaption>Settings → Appearance (real screenshot)</figcaption></figure>
+  </div>
+</div>
+
+<!-- tier 3 -->
+<div class="tier" id="tier3">
+  <h3><span class="tag t-rare">RARELY</span>&nbsp; Leave these alone unless you need them</h3>
+
+  <div class="setgrid">
+    <div>
+      <h4>Connection: computer name and profiles</h4>
+      <ul>
+        <li><b>Name</b>: how this computer appears on the other one. Change it if both are called something unhelpful like "DESKTOP-7F3K2".</li>
+        <li><b>Profiles</b>: save named copies of all your settings, e.g. "desk" and "travel". For people who move between setups.</li>
+        <li><b>Advanced</b>: network ports and the like. Only touch these if someone helping you asks.</li>
+      </ul>
+    </div>
+    <figure><div class="shot win"><img src="img/set-connection.png" alt="Connection settings"></div><figcaption>Settings → Connection (real screenshot)</figcaption></figure>
+  </div>
+
+  <div class="setgrid">
+    <div>
+      <h4>Run as administrator <span class="tag t-win">WINDOWS ONLY</span></h4>
+      <p>At the bottom of <b>Settings → Startup</b>. Only needed if you want the pointer to keep working while an administrator window (an installer, a UAC prompt, some games) is in front.</p>
+      <ol>
+        <li><b>Permissions → Restart as administrator</b>. Windows asks "Do you want to allow this app to make changes?" Click <b>Yes</b>.</li>
+        <li>Then turn on <b>Start at login as administrator</b>. Windows asks <b>once</b> more. After that it starts with admin rights at every login, <b>without asking again</b>.</li>
+      </ol>
+      <p class="small muted">Off by default. Turning it off removes everything it set up.</p>
+    </div>
+    <figure>
+      <span class="illus-label"><span class="tag t-illus">DRAWN ILLUSTRATION</span></span>
+      <div class="uac">
+        <div class="top">User Account Control</div>
+        <div class="mid"><b style="font-size:15px">Do you want to allow this app to make changes to your device?</b><br><br>dyavon.exe<br><span class="muted">Publisher: Unknown</span></div>
+        <div class="bot"><span class="p">Yes</span><span>No</span></div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="setgrid">
+    <div>
+      <h4>Diagnostics and About</h4>
+      <ul>
+        <li><b>Diagnostics</b>: where the log file is (<b>Open folder</b>). Needed only when reporting a problem.</li>
+        <li><b>About</b>: the version number, <b>Check now</b> for updates, and <b>Restore defaults</b> (resets your preferences; keeps your pairings and computer name).</li>
+      </ul>
+      <p class="small muted">Linux also has <b>Share input at the login screen</b> under Startup, which lets you type your login password with the other computer's keyboard. It installs a system service and asks for your password.</p>
+    </div>
+    <div></div>
+  </div>
+</div>
+
+<!-- ================= TROUBLE ================= -->
+<h2 id="trouble">If something doesn't work</h2>
+<dl class="faq">
+  <dt>Pairing says "no server found"</dt>
+  <dd>Check both computers are on the same network (same router, not a guest Wi-Fi). On Windows, check the firewall (step 2d). Then press <b>Detect</b> on the "Is controlled" computer, or type the other computer's address from its <b>Connection details</b>.</dd>
+  <dt>The code doesn't work</dt>
+  <dd>Codes last 5 minutes and work once. Press <b>Pair a new device</b> for a fresh one, and type it within 5 minutes.</dd>
+  <dt>The pointer won't cross</dt>
+  <dd>Look at the top of both windows: they must say <b>Connected</b>. Check which edge it expects (Settings → Screens &amp; edges). On Windows, an administrator window in front also blocks it: click on something else.</dd>
+  <dt>The pointer is "stuck" on the other computer</dt>
+  <dd>Press <kbd>Scroll Lock</kbd> (or the key you chose). Control comes straight back.</dd>
+  <dt>It worked yesterday but not today</dt>
+  <dd>Is Dyavon open on both? Turn on <b>Start at login</b> on both so it always is. If the address of a computer changed (new router), Dyavon usually finds it again within seconds.</dd>
+  <dt>I reinstalled Windows on one computer</dt>
+  <dd>Pair again: <b>Pair a new device</b> on the computer that shares its mouse. Then remove the old entry under Security &amp; pairing.</dd>
+</dl>
+
+<h2 id="report">Report a problem</h2>
+<p>Open an issue at <a href="https://github.com/prashantpal8980/dyavon/issues">github.com/prashantpal8980/dyavon/issues</a> (free GitHub account needed). Say what you did and what happened, and attach the log file: <b>Settings → Diagnostics → Open folder</b>, file <code>dyavon.log</code>.</p>
+<ul class="small">
+  <li>Windows: <code>%USERPROFILE%\.dyavon\dyavon.log</code></li>
+  <li>Linux: <code>~/.dyavon/dyavon.log</code></li>
+</ul>
+
+<footer>
+  Dyavon is free and open source (Apache-2.0). Screenshots of Dyavon and GitHub are real, taken from a Dyavon 1.0.0 build on 2 Nov 2026; the app looks the same on Windows and Linux. Windows system dialogs (SmartScreen, Firewall, Extract All, UAC, Edge download) are drawn illustrations, because their exact look varies with Windows version and language. The computer names "Office-PC" and "Laptop" and the address 192.168.1.20 are examples.
+</footer>
+</main>
+</div>
+</body>
+</html>
