@@ -450,3 +450,11 @@ Owner: "Dyavon … your cursor knows no border … make sure in the github file 
 - On screen it is always **Dyavon** (window title, header, tray, notifications, About, messages). Files, commands, folders and environment variables are lowercase: `dyavon`, `dyavon.exe`, `~/.dyavon`, `DYAVON_*`.
 - A machine set up as mouse-rs keeps its settings, pairings and clipboard history on first start, and its start-at-login entry is swapped, never doubled. `~/.mouse_share` is left as it was.
 - Chosen because nothing else used the name on 19 Nov 2026: crates.io, npm, PyPI, GitHub, the .com, web search.
+
+### R49 — Preferred network is a real preference, both ways (19 Nov 2026)
+Owner: "if somebody select preferred network as cable … no matter how … if there are no connection on cable only then it will move to Wi-Fi … and the preferred is Wi-Fi and there is no connection found on Wi-Fi it is changed to cable … because we have auto connect".
+- **Cable first:** the link uses the cable whenever the cable works, judged at **both** ends (B76). Wi-Fi only when the cable does not answer.
+- **Wi-Fi first:** the same, the other way round.
+- **Fallback is automatic:** when the preferred network stops working, the link reconnects over the other one by itself.
+- **Moving back is automatic:** while on the fallback, Dyavon checks every 5 s whether the preferred network answers, and moves the link back as soon as it does (B77). A preferred network that answers but cannot hold a session is checked less and less often (up to every 5 min), so the link does not keep dropping.
+- **Whichever answers first** never moves a working link.
