@@ -80,6 +80,8 @@ ln -sfn "$REPO_ROOT/scripts/windows-update.ps1" "$SERVE_DIR/u.txt"
 ln -sfn "$REPO_ROOT/scripts/windows-b72-check.ps1" "$SERVE_DIR/b72.txt"
 # The one-time mouse-rs -> Dyavon switch, as text for `irm <url>/rename.txt | iex`.
 ln -sfn "$REPO_ROOT/scripts/windows-rename.ps1" "$SERVE_DIR/rename.txt"
+# Reset for installing Dyavon from GitHub as a new user, for `irm <url>/fresh.txt | iex`.
+ln -sfn "$REPO_ROOT/scripts/windows-fresh-start.ps1" "$SERVE_DIR/fresh.txt"
 ln -sfn "$REPO_ROOT/docs/windows-clipboard-prompt.md" "$SERVE_DIR/clipboard.md"
 printf 'dyavon.exe  %s bytes\nSHA256  %s\n' "$SIZE" "$SHA" > "$SERVE_DIR/CHECKSUM.txt"
 
