@@ -31,6 +31,48 @@ impl Default for Options {
 /// The program file's name in the install folder.
 pub const EXE_NAME: &str = if cfg!(windows) { "dyavon.exe" } else { "dyavon" };
 
+/// The icon file in the install folder that the shortcuts, app menu and Apps entry show.
+/// It is rewritten when the colour theme changes, so they follow the theme (R51).
+pub const ICON_FILE: &str = if cfg!(windows) { "dyavon.ico" } else { "dyavon.png" };
+
+fn icon_bytes(theme: &str) -> Vec<u8> {
+    let icon = crate::brand::for_theme(theme);
+    if cfg!(windows) {
+        crate::brand::ico(icon)
+    } else {
+        icon.png256().to_vec()
+    }
+}
+
+/// Write the theme's icon into `dir` unless it is already there. True if it changed.
+fn write_icon(dir: &Path, theme: &str) -> Result<bool> {
+    let path = dir.join(ICON_FILE);
+    let want = icon_bytes(theme);
+    if std::fs::read(&path).ok().as_deref() == Some(&want[..]) {
+        return Ok(false);
+    }
+    std::fs::write(&path, &want).with_context(|| format!("writing {}", path.display()))?;
+    Ok(true)
+}
+
+/// Make the installed shortcuts show the icon for `theme` (R51). Does nothing for a copy
+/// run without installing, which has no shortcuts. Blocking but short: call it off the UI
+/// thread.
+pub fn refresh_icon(theme: &str) {
+    if !is_installed_copy() {
+        return;
+    }
+    let Some(dir) = install_dir() else { return };
+    match write_icon(&dir, theme) {
+        Ok(true) => {
+            platform::icon_changed();
+            tracing::info!(theme, "shortcut icon updated");
+        }
+        Ok(false) => {}
+        Err(e) => tracing::warn!("shortcut icon: {e:#}"),
+    }
+}
+
 /// The summary shown before installing and on the About page. It restates the licence's own
 /// terms (Apache-2.0 sections 7 and 8) in plain words; the licence itself is what applies.
 pub const LEGAL_SUMMARY: &str = "Dyavon is free, open-source software, released under the Apache License, Version 2.0.\n\n\
@@ -99,7 +141,7 @@ pub fn should_offer(declined: bool) -> bool {
 
 /// Copy this program into the install folder and set up what `opts` asks for. Returns the
 /// installed program, which the caller starts before quitting this copy.
-pub fn install(opts: Options) -> Result<PathBuf> {
+pub fn install(opts: Options, theme: &str) -> Result<PathBuf> {
     let src = std::env::current_exe().context("finding this program")?;
     let dir = install_dir().context("no home folder to install into")?;
     std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
@@ -108,6 +150,7 @@ pub fn install(opts: Options) -> Result<PathBuf> {
     let exe = dir.join(EXE_NAME);
     copy_over(&src, &exe)?;
     copy_companions(&src, &dir)?;
+    write_icon(&dir, theme)?;
     platform::install(&exe, &dir, opts)?;
     if opts.start_at_login {
         crate::autostart::enable_for(&exe).context("turning on start at login")?;
@@ -296,8 +339,9 @@ pub(crate) fn install_script(exe: &Path, dir: &Path, opts: Options, version: &st
     let mut s = format!(
         "$ErrorActionPreference='Stop'\n\
          $exe={exe}; $dir={dir}\n\
+         $ico=Join-Path $dir 'dyavon.ico'\n\
          function Lnk($path) {{ $l=(New-Object -ComObject WScript.Shell).CreateShortcut($path); $l.TargetPath=$exe; \
-         $l.WorkingDirectory=$dir; $l.IconLocation=\"$exe,0\"; $l.Description='One mouse and keyboard for all your computers'; $l.Save() }}\n"
+         $l.WorkingDirectory=$dir; $l.IconLocation=\"$ico,0\"; $l.Description='One mouse and keyboard for all your computers'; $l.Save() }}\n"
     );
     if opts.desktop_shortcut {
         s += "Lnk (Join-Path ([Environment]::GetFolderPath('Desktop')) 'Dyavon.lnk')\n";
@@ -311,7 +355,7 @@ pub(crate) fn install_script(exe: &Path, dir: &Path, opts: Options, version: &st
          Set-ItemProperty $k DisplayName 'Dyavon'\n\
          Set-ItemProperty $k DisplayVersion {ver}\n\
          Set-ItemProperty $k Publisher 'Dyavon contributors'\n\
-         Set-ItemProperty $k DisplayIcon \"$exe,0\"\n\
+         Set-ItemProperty $k DisplayIcon \"$ico,0\"\n\
          Set-ItemProperty $k InstallLocation $dir\n\
          Set-ItemProperty $k UninstallString ('\"' + $exe + '\" uninstall')\n\
          Set-ItemProperty $k URLInfoAbout 'https://github.com/prashantpal8980/dyavon'\n\
@@ -377,8 +421,7 @@ mod platform {
     }
 
     pub(super) fn install(exe: &Path, dir: &Path, opts: Options) -> Result<()> {
-        let icon = dir.join("dyavon.png");
-        std::fs::write(&icon, crate::brand::ICON_256_PNG).context("writing the icon")?;
+        let icon = dir.join(ICON_FILE);
         let text = entry_text(exe, &icon);
         if opts.menu_entry {
             let f = menu_file().context("no app-menu folder")?;
@@ -399,6 +442,16 @@ mod platform {
             }
         }
         Ok(())
+    }
+
+    /// The icon file changed: rewrite the launchers unchanged so desktops that cache by
+    /// the .desktop file's time pick the new picture up.
+    pub(super) fn icon_changed() {
+        for f in [menu_file(), desktop_dir().map(|d| d.join(ENTRY_FILE))].into_iter().flatten() {
+            if let Ok(text) = std::fs::read(&f) {
+                let _ = std::fs::write(&f, text);
+            }
+        }
     }
 
     pub(super) fn remove_shortcuts(out: &mut Vec<Done>) {
@@ -481,6 +534,15 @@ mod platform {
         let size_kb = std::fs::metadata(exe).map(|m| m.len() / 1024).unwrap_or(0);
         powershell(&super::install_script(exe, dir, opts, crate::update::VERSION, size_kb))
             .context("creating the shortcuts and the Settings › Apps entry")
+    }
+
+    /// The icon file changed: ask Explorer to drop its cached copy so the shortcuts and
+    /// the Apps entry redraw with the new one.
+    pub(super) fn icon_changed() {
+        let _ = std::process::Command::new("ie4uinit.exe")
+            .arg("-show")
+            .creation_flags(CREATE_NO_WINDOW)
+            .status();
     }
 
     pub(super) fn remove_shortcuts(out: &mut Vec<Done>) {

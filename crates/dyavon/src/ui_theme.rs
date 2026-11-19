@@ -39,7 +39,8 @@ pub struct Palette {
     pub dark: bool,
 }
 
-/// The six selectable themes (R40).
+/// The selectable themes: the six of the redesign (R40) and four more that match the
+/// icon's colour versions (R52).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Theme6 {
     Graphite,
@@ -48,6 +49,10 @@ pub enum Theme6 {
     Forest,
     Slate,
     Porcelain,
+    Coral,
+    Lime,
+    Saffron,
+    Violet,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -63,13 +68,17 @@ const fn pal(
 }
 
 impl Theme6 {
-    pub const ALL: [Theme6; 6] = [
+    pub const ALL: [Theme6; 10] = [
         Theme6::Graphite,
         Theme6::Ember,
         Theme6::Plum,
         Theme6::Forest,
         Theme6::Slate,
         Theme6::Porcelain,
+        Theme6::Coral,
+        Theme6::Lime,
+        Theme6::Saffron,
+        Theme6::Violet,
     ];
 
     /// The name stored in the config.
@@ -81,6 +90,10 @@ impl Theme6 {
             Theme6::Forest => "forest",
             Theme6::Slate => "slate",
             Theme6::Porcelain => "porcelain",
+            Theme6::Coral => "coral",
+            Theme6::Lime => "lime",
+            Theme6::Saffron => "saffron",
+            Theme6::Violet => "violet",
         }
     }
 
@@ -97,6 +110,10 @@ impl Theme6 {
             Theme6::Forest => "Forest & Mint",
             Theme6::Slate => "Slate & Sand",
             Theme6::Porcelain => "Porcelain",
+            Theme6::Coral => "Coral",
+            Theme6::Lime => "Lime",
+            Theme6::Saffron => "Saffron",
+            Theme6::Violet => "Violet",
         }
     }
 
@@ -108,6 +125,10 @@ impl Theme6 {
             Theme6::Forest => "Mixed · deep green top, mint body",
             Theme6::Slate => "Mixed · navy top, sand body",
             Theme6::Porcelain => "Light · soft neutral gray",
+            Theme6::Coral => "Light · warm cream, coral accent",
+            Theme6::Lime => "Dark · graphite, lime accent",
+            Theme6::Saffron => "Mixed · saffron top, cream body",
+            Theme6::Violet => "Light · lavender, violet accent",
         }
     }
 
@@ -138,10 +159,27 @@ impl Theme6 {
                 0xecebe8, 0xf7f7f5, 0xe2e1dd, 0xd6d4cf, 0x1b1c1e, 0x505257, 0x686a70,
                 0xb86a1f, 0xffffff, 0x2e7d4f, 0x8f660c, 0xb8433b, false,
             ),
+            Theme6::Coral => pal(
+                0xf6eee3, 0xfdf8f2, 0xefe5d8, 0xe2d6c6, 0x1f1a17, 0x574c44, 0x6e6259,
+                0xb8432a, 0xffffff, 0x276b43, 0x7d5908, 0xa52a2a, false,
+            ),
+            Theme6::Lime => pal(
+                0x17191c, 0x1f2226, 0x282b30, 0x33373d, 0xeef0ea, 0xb0b5ab, 0x8e938a,
+                0xbef264, 0x18200a, 0x7dd3a8, 0xe3b45c, 0xec7b72, true,
+            ),
+            Theme6::Saffron => pal(
+                0xfbf4e6, 0xfffaf0, 0xf3e9d3, 0xe6d8bb, 0x1d1a14, 0x554a35, 0x6b5e45,
+                0x975800, 0xffffff, 0x2e7d4f, 0x8a5f00, 0xb8433b, false,
+            ),
+            Theme6::Violet => pal(
+                0xeeebfa, 0xfaf9ff, 0xe4e0f5, 0xd6d0ec, 0x1e1838, 0x4d4670, 0x5f5882,
+                0x4b36b0, 0xffffff, 0x0f7366, 0x8a5f00, 0xb3403a, false,
+            ),
         }
     }
 
-    /// The header and status-card palette: dark for the mixed themes, else the body's.
+    /// The header and status-card palette: dark for the mixed themes (saffron for
+    /// Saffron), else the body's.
     pub fn hero(self) -> Palette {
         match self {
             Theme6::Plum => pal(
@@ -155,6 +193,11 @@ impl Theme6 {
             Theme6::Slate => pal(
                 0x1f2836, 0x283344, 0x313e52, 0x3c4a60, 0xedf1f7, 0xb5bfce, 0x94a0b2,
                 0x9cc3ec, 0x14202e, 0x8fd3a8, 0xe8c27a, 0xf39d93, true,
+            ),
+            // The one bright top: dark text on saffron, like its icon.
+            Theme6::Saffron => pal(
+                0xf5a524, 0xf7b445, 0xf9c266, 0xd98e1a, 0x1a1a1e, 0x3a2e12, 0x4a3b17,
+                0x1a1a1e, 0xfff6e5, 0x174a2d, 0x4f3500, 0x7a1a12, false,
             ),
             other => other.palette(),
         }

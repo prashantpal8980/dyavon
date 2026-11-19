@@ -4,14 +4,15 @@ Dates are when the work was committed. Item codes refer to
 [docs/KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md) (B…) and
 [docs/UI-REQUIREMENTS.md](docs/UI-REQUIREMENTS.md) (R…).
 
-## Unreleased
+## 1.1.0 — 19 Nov 2026
 
 - **Install and remove (R50).** The downloaded program offers to install itself, after
   showing the licence and disclaimer, with options for a desktop shortcut, a Start-menu or
   app-menu entry and start at login. No administrator or root rights. On Windows it appears
   in **Settings › Apps**. **Settings › Remove Dyavon from this computer…** removes it all,
   with a switch to keep or delete your settings and pairings.
-- **An icon:** a "D" split by a river, on the exe, window, tray, shortcuts and app menu.
+- **An icon that follows the theme:** "H · Crossing", a "D" split into two halves by a river with a second river crossing it. Amber by default; each colour theme has its own version, and changing the theme changes the window, tray, shortcut and app-menu icon. The exe file itself always shows Amber.
+- **Four new colour themes:** Coral, Lime, Saffron and Violet, each with its own icon, for ten themes in all.
   The Windows exe also carries its name and version (Properties › Details).
 - **Licence and disclaimer** on the install screen, in About, the README, the user guide
   and the read-me in each download.

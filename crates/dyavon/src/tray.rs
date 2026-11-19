@@ -42,6 +42,17 @@ impl TrayParts {
         self.start.set_enabled(!running);
         self.stop.set_enabled(running);
     }
+
+    /// Show the icon for a colour theme (R51).
+    fn apply_icon(&self, theme: &str) {
+        let (rgba, w, h) = icon_rgba(theme);
+        match tray_icon::Icon::from_rgba(rgba, w, h) {
+            Ok(i) => {
+                let _ = self.icon.set_icon(Some(i));
+            }
+            Err(e) => tracing::warn!("tray icon: {e}"),
+        }
+    }
 }
 
 #[cfg(windows)]
@@ -56,6 +67,8 @@ thread_local! {
 struct Desired {
     tooltip: String,
     running: bool,
+    /// The colour theme whose icon to show (R51).
+    theme: &'static str,
 }
 
 /// Kept alive by the app for the tray's lifetime; carries the desired tray state.
@@ -67,14 +80,31 @@ impl TrayHandle {
     /// Push live status to the tray. Cheap to call every tick — it only touches the OS when
     /// something actually changed.
     pub fn set_state(&self, tooltip: &str, running: bool) {
-        let next = Desired { tooltip: tooltip.to_owned(), running };
         if let Ok(mut cur) = self.desired.lock() {
+            let next = Desired { tooltip: tooltip.to_owned(), running, theme: cur.theme };
             if *cur != next {
                 *cur = next;
                 #[cfg(windows)]
                 WIN_TRAY.with(|t| {
                     if let Some(parts) = t.borrow().as_ref() {
                         parts.apply(tooltip, running);
+                    }
+                });
+            }
+        }
+    }
+}
+
+impl TrayHandle {
+    /// Switch the tray to a colour theme's icon (R51). Cheap when nothing changed.
+    pub fn set_theme(&self, theme: &'static str) {
+        if let Ok(mut cur) = self.desired.lock() {
+            if cur.theme != theme {
+                cur.theme = theme;
+                #[cfg(windows)]
+                WIN_TRAY.with(|t| {
+                    if let Some(parts) = t.borrow().as_ref() {
+                        parts.apply_icon(theme);
                     }
                 });
             }
@@ -98,7 +128,7 @@ pub fn poll() -> Vec<TrayEvent> {
 }
 
 /// Build the tray icon + menu on the current thread.
-fn build() -> Result<TrayParts, Box<dyn std::error::Error>> {
+fn build(theme: &str) -> Result<TrayParts, Box<dyn std::error::Error>> {
     let menu = Menu::new();
     // `Start`/`Stop` are held so their enabled state can follow the engine. They start as
     // "not running": nothing is shared until the app says otherwise.
@@ -112,7 +142,7 @@ fn build() -> Result<TrayParts, Box<dyn std::error::Error>> {
     menu.append(&PredefinedMenuItem::separator())?;
     menu.append(&MenuItem::with_id("quit", "Quit", true, None))?;
 
-    let (rgba, w, h) = icon_rgba();
+    let (rgba, w, h) = icon_rgba(theme);
     let icon = tray_icon::Icon::from_rgba(rgba, w, h)?;
     let icon = TrayIconBuilder::new()
         .with_tooltip("Dyavon")
@@ -124,15 +154,16 @@ fn build() -> Result<TrayParts, Box<dyn std::error::Error>> {
 
 /// Spawn the tray. Returns `None` (and logs) if the platform tray can't be created, in
 /// which case the app just runs as a normal window. Must be called on the UI thread.
-pub fn spawn(initial_tooltip: &str) -> Option<TrayHandle> {
+pub fn spawn(initial_tooltip: &str, theme: &'static str) -> Option<TrayHandle> {
     let desired = Arc::new(Mutex::new(Desired {
         tooltip: initial_tooltip.to_string(),
         running: false,
+        theme,
     }));
 
     #[cfg(windows)]
     {
-        match build() {
+        match build(theme) {
             Ok(parts) => {
                 WIN_TRAY.with(|t| *t.borrow_mut() = Some(parts));
                 Some(TrayHandle { desired })
@@ -154,7 +185,7 @@ pub fn spawn(initial_tooltip: &str) -> Option<TrayHandle> {
                     tracing::warn!("gtk init failed; running without a tray");
                     return;
                 }
-                match build() {
+                match build(theme) {
                     Ok(parts) => {
                         // The icon and menu items may only be touched on this (gtk) thread,
                         // so poll the shared state here. `parts` is moved in and kept alive
@@ -165,6 +196,9 @@ pub fn spawn(initial_tooltip: &str) -> Option<TrayHandle> {
                             move || {
                                 if let Ok(g) = want.lock() {
                                     if applied.as_ref() != Some(&*g) {
+                                        if applied.as_ref().is_some_and(|a| a.theme != g.theme) {
+                                            parts.apply_icon(g.theme);
+                                        }
                                         parts.apply(&g.tooltip, g.running);
                                         applied = Some(g.clone());
                                     }
@@ -188,8 +222,8 @@ pub fn spawn(initial_tooltip: &str) -> Option<TrayHandle> {
     }
 }
 
-/// The Dyavon icon at 32×32 (see `brand`), built into the binary so
-/// there's no image file to ship.
-fn icon_rgba() -> (Vec<u8>, u32, u32) {
-    (crate::brand::ICON_32_RGBA.to_vec(), 32, 32)
+/// A theme's Dyavon icon at 32×32 (see `brand`), built into the binary so there's no
+/// image file to ship.
+fn icon_rgba(theme: &str) -> (Vec<u8>, u32, u32) {
+    (crate::brand::for_theme(theme).rgba32.to_vec(), 32, 32)
 }

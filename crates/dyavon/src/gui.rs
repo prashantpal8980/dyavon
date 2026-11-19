@@ -388,6 +388,8 @@ fn pending_restart_changes(live: &Config, now: &Config) -> Vec<&'static str> {
 }
 
 struct App {
+    /// The colour theme whose icon the window, tray and shortcuts show now (R51).
+    icon_theme: &'static str,
     cfg: Config,
     /// The system's light/dark setting, once known; used when the theme follows it.
     system_dark: Option<bool>,
@@ -658,7 +660,10 @@ impl App {
             screen_w_s: cfg.screen_width.to_string(),
             screen_h_s: cfg.screen_height.to_string(),
             // Spawn the tray here — boot runs on the UI thread, which Windows requires.
-            tray: crate::tray::spawn("Dyavon — stopped"),
+            tray: crate::tray::spawn("Dyavon — stopped", Theme6::from_key(&cfg.theme).key()),
+            // Empty, so the first update syncs the window, tray and shortcuts to the theme
+            // in use, even if the shortcuts were left on another theme.
+            icon_theme: "",
             notified_waiting: 0,
             notified_login_screen: false,
             clip_rates: std::collections::HashMap::new(),
@@ -979,6 +984,10 @@ impl App {
         let quiet = matches!(message, Message::Tick | Message::KeyEvent(_) | Message::SystemTheme(_));
         let said = self.feedback.clone();
         let task = self.handle(message);
+        let task = match self.sync_icon() {
+            Some(icon) => Task::batch([task, icon]),
+            None => task,
+        };
         if !quiet {
             self.last_edit = Some(std::time::Instant::now());
         }
@@ -1363,7 +1372,7 @@ impl App {
             }
             Message::InstallNow if self.install_accepted => {
                 self.install_error = None;
-                match crate::install::install(self.install_opts).and_then(|exe| crate::install::start(&exe).map(|()| exe)) {
+                match crate::install::install(self.install_opts, self.theme6().key()).and_then(|exe| crate::install::start(&exe).map(|()| exe)) {
                     Ok(exe) => {
                         tracing::info!("started the installed copy at {}; this copy quits", exe.display());
                         return iced::exit();
@@ -2199,6 +2208,25 @@ impl App {
             subs.push(iced::keyboard::listen().map(Message::KeyEvent));
         }
         Subscription::batch(subs)
+    }
+
+    /// Make the window, tray and installed shortcuts show the icon of the theme in use
+    /// (R51). Returns the window's task when the theme changed since the last call.
+    fn sync_icon(&mut self) -> Option<Task<Message>> {
+        let key = self.theme6().key();
+        if key == self.icon_theme {
+            return None;
+        }
+        self.icon_theme = key;
+        if let Some(t) = &self.tray {
+            t.set_theme(key);
+        }
+        // Shortcuts: a file write (and on Windows a cache refresh), so off the UI thread.
+        let _ = std::thread::Builder::new()
+            .name("shortcut-icon".into())
+            .spawn(move || crate::install::refresh_icon(key));
+        let icon = iced::window::icon::from_rgba(crate::brand::for_theme(key).rgba64.to_vec(), 64, 64).ok()?;
+        Some(iced::window::latest().and_then(move |id| iced::window::set_icon(id, icon.clone())))
     }
 
     /// The theme in use: the saved one, or the system's light/dark pick (R40).
@@ -4821,7 +4849,11 @@ impl App {
         let menu_label = if cfg!(windows) { "Add to the Start menu" } else { "Add to the app menu" };
         let mut col = column![
             row![
-                iced::widget::image(iced::widget::image::Handle::from_rgba(64, 64, crate::brand::ICON_64_RGBA.to_vec()))
+                iced::widget::image(iced::widget::image::Handle::from_rgba(
+                    64,
+                    64,
+                    crate::brand::for_theme(self.theme6().key()).rgba64.to_vec(),
+                ))
                     .width(48.0)
                     .height(48.0),
                 column![
@@ -5697,6 +5729,9 @@ fn refusal_text(why: &str) -> String {
 
 /// Open the control panel, blocking until the window closes.
 pub fn launch(cfg: Config) -> anyhow::Result<()> {
+    // The saved theme's icon; the system's light/dark pick, if followed, arrives after the
+    // window opens and `sync_icon` swaps it then.
+    let first_icon = crate::brand::for_theme(Theme6::from_key(&cfg.theme).key()).rgba64.to_vec();
     iced::application(
         move || (App::new(cfg.clone()), iced::system::theme().map(Message::SystemTheme)),
         App::update,
@@ -5715,7 +5750,7 @@ pub fn launch(cfg: Config) -> anyhow::Result<()> {
             min_size: Some(iced::Size::new(360.0, 420.0)),
             // Closing still quits; `close_requests` routes it through Quit's check.
             exit_on_close_request: false,
-            icon: iced::window::icon::from_rgba(crate::brand::ICON_64_RGBA.to_vec(), 64, 64).ok(),
+            icon: iced::window::icon::from_rgba(first_icon, 64, 64).ok(),
             ..Default::default()
         })
         .run()
@@ -5965,7 +6000,8 @@ mod layout_role_tests {
         for t in [Theme6::Plum, Theme6::Forest, Theme6::Slate] {
             assert!(t.hero().dark && !t.palette().dark, "{t:?}");
         }
-        for t in [Theme6::Graphite, Theme6::Ember, Theme6::Porcelain] {
+        assert_ne!(Theme6::Saffron.hero().bg, Theme6::Saffron.palette().bg, "Saffron has its own top");
+        for t in [Theme6::Graphite, Theme6::Ember, Theme6::Porcelain, Theme6::Coral, Theme6::Lime, Theme6::Violet] {
             assert_eq!(t.hero().bg, t.palette().bg, "{t:?}");
         }
     }

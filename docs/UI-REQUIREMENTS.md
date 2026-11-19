@@ -465,6 +465,22 @@ Owner: "build it for both linux and windows … during installation and deletion
   - Windows: `%LOCALAPPDATA%\Programs\Dyavon`, shortcuts on the Desktop and in the Start menu, and an entry in **Settings › Apps** whose Uninstall opens Dyavon's own removal screen. No administrator rights needed.
   - Linux: `~/.local/share/dyavon`, an app-menu entry (`~/.local/share/applications`), icons in the user's icon theme, and an optional desktop launcher. No root needed.
 - **Remove Dyavon from this computer…** is the last row of Settings. It shows what will be removed, with a checkbox **Also delete my settings and pairings** (off). Kept settings are picked up again by a reinstall. It removes the start-at-login entry, the shortcuts and menu entry, the Apps entry, the firewall rules and administrator task (one Windows prompt), the login-screen service (one Linux password prompt), received files and the clipboard cache, and the installed program. Then it shows what it did and quits, leaving nothing running. A copy run without installing leaves its own folder and says where it is.
-- **Icon:** the "D split by a river" monogram (`assets/icon/dyavon.svg`, amber on dark). It is used on the exe (Explorer, taskbar, shortcuts), the window, the tray, the app menu and the Apps entry. Other concepts are kept in `assets/icon/concepts/`.
+- **Icon:** *(superseded by R51, "H · Crossing", following the theme; the R50 design is `assets/icon/concepts/d-river-d-r50.svg`)* the "D split by a river" monogram (amber on dark). It is used on the exe (Explorer, taskbar, shortcuts), the window, the tray, the app menu and the Apps entry. Other concepts are kept in `assets/icon/concepts/`.
 - **Closing after removal:** on Windows a hidden helper deletes the files Dyavon still holds open (the program, its log) a moment after it exits, then ends. That is the one thing allowed to outlive Dyavon (an exception to R33's "quit means quit"), and only because it is the removal itself.
 - **Legal notice:** the install screen, About and README state that Dyavon is free, open-source software under the Apache License 2.0, provided "AS IS" without warranties, and that the authors are not liable for damages from its use. They link the full licence. This is a summary of the licence's own terms (sections 7 and 8), not separate legal advice.
+
+### R51 — The icon is "H · Crossing" and follows the colour theme (19 Nov 2026)
+Owner, after choosing among the concepts on the Claude Design canvas ("Dyavon Logo"): "we are gonna go with … H crossing … each time the person changes the theme the logos logo gets changed as well … the amber one … would be the first one the dominant one and a user can change this logo by themselves as well. It's like the theme".
+- **Shape:** the D split top to bottom by a wavy river into two halves of different colours (the pair), with a second river crossing it left to right (`assets/icon/dyavon.svg`). Replaces R50's single-colour "River D", which read like the Dogecoin Ð.
+- **Default:** Amber: warm near-black tile `#17120E`, cream left half `#F5EDE3`, amber right half and river `#F59E0B`. Amber is the default theme, so a new install shows this icon.
+- **Follows the theme:** each of the six themes has its own icon colours, taken from that theme. Picking a theme (or Match system) changes the window icon, the tray icon, the install-screen picture, and the installed shortcuts' and app-menu icon. The user changes the icon by changing the theme; there is no separate icon setting.
+- **Stays Amber:** the icon built into `dyavon.exe` (what Explorer shows for the file itself, and the download) and the GitHub/README images; those can't follow a per-user setting.
+
+### R52 — Four more themes, one per icon colour (19 Nov 2026)
+Owner: "for each logo design we don't have a respective color like for amber, coral, mint, plum, lime, saffron, violet … design the color … for all this color theme would be there a theme in our software."
+- Settings › Appearance offers ten themes. Amber, Plum & Cream and Forest & Mint already covered the canvas's Amber, Plum and Mint icons; four are new:
+  - **Coral** — light: warm cream, coral accent.
+  - **Lime** — dark: graphite, lime accent.
+  - **Saffron** — mixed: a bright saffron top with dark text, over a cream body.
+  - **Violet** — light: lavender, violet accent.
+- Each has its matching "H · Crossing" icon (R51), which the window, tray and shortcuts switch to with the theme. All text colours meet 4.5:1 contrast on their background.

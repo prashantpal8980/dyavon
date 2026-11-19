@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dyavon "H · Crossing" (R51). make-icons.sh fills BG, LETTER, RIVER, EDGE per theme. -->
+  <defs><clipPath id="left"><path d="M0 0H218V96C246 150 190 200 218 256C246 312 190 362 218 416V512H0Z"/></clipPath></defs>
+  <rect x="4" y="4" width="504" height="504" rx="112" fill="#FBF3E8" stroke="#E2D6C6" stroke-width="8"/>
+  <path fill-rule="evenodd" fill="#EF5B35" d="M128 112H256A144 144 0 0 1 256 400H128ZM236 176V336H256A80 80 0 0 0 256 176Z"/>
+  <path fill-rule="evenodd" fill="#1F1A17" clip-path="url(#left)" d="M128 112H256A144 144 0 0 1 256 400H128ZM236 176V336H256A80 80 0 0 0 256 176Z"/>
+  <path d="M218 96C246 150 190 200 218 256C246 312 190 362 218 416" fill="none" stroke="#FBF3E8" stroke-width="22" stroke-linecap="round"/>
+  <path d="M96 278C156 228 216 328 276 278S396 228 420 258" fill="none" stroke="#FBF3E8" stroke-width="34" stroke-linecap="round"/>
+  <path d="M96 278C156 228 216 328 276 278S396 228 420 258" fill="none" stroke="#EF5B35" stroke-width="11" stroke-linecap="round"/>
+</svg>
