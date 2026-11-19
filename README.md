@@ -13,7 +13,7 @@ Your keyboard follows, and so does your clipboard.
 
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?logo=linux&logoColor=black) ![Rust](https://img.shields.io/badge/built%20with-Rust-B7410E?logo=rust&logoColor=white) ![Tests](https://img.shields.io/badge/tests-345%20passing-2EA043) ![Licence](https://img.shields.io/badge/licence-Apache--2.0-2EA043)
 
-[Install](#-install) · [Connect your computers](#-connect-your-computers) · [Update](#-update) · [Report a problem](#-report-a-problem) · [Troubleshooting](#-troubleshooting) · [For developers](#-for-developers)
+**[📖 User guide](https://prashantpal8980.github.io/dyavon/user-guide/)** · [Install](#-install) · [Connect your computers](#-connect-your-computers) · [Update](#-update) · [Report a problem](#-report-a-problem) · [Troubleshooting](#-troubleshooting) · [For developers](#-for-developers)
 
 </div>
 
@@ -48,6 +48,8 @@ current that runs between them. Two machines, one stream of input flowing across
 ---
 
 ## 📦 Install
+
+> New to Dyavon? The **[step-by-step user guide](https://prashantpal8980.github.io/dyavon/user-guide/)** walks you through it with screenshots.
 
 Install Dyavon on every computer you want to share between. Windows and Linux can be
 mixed in any combination. It takes about a minute per computer, and nothing needs a reboot.
