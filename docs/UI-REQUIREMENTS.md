@@ -451,10 +451,10 @@ Owner: "Dyavon … your cursor knows no border … make sure in the github file 
 - A machine set up as mouse-rs keeps its settings, pairings and clipboard history on first start, and its start-at-login entry is swapped, never doubled. `~/.mouse_share` is left as it was.
 - Chosen because nothing else used the name on 19 Nov 2026: crates.io, npm, PyPI, GitHub, the .com, web search.
 
-### R49 — Preferred network is a real preference, both ways (19 Nov 2026)
-Owner: "if somebody select preferred network as cable … no matter how … if there are no connection on cable only then it will move to Wi-Fi … and the preferred is Wi-Fi and there is no connection found on Wi-Fi it is changed to cable … because we have auto connect".
-- **Cable first:** the link uses the cable whenever the cable works, judged at **both** ends (B76). Wi-Fi only when the cable does not answer.
-- **Wi-Fi first:** the same, the other way round.
-- **Fallback is automatic:** when the preferred network stops working, the link reconnects over the other one by itself.
-- **Moving back is automatic:** while on the fallback, Dyavon checks every 5 s whether the preferred network answers, and moves the link back as soon as it does (B77). A preferred network that answers but cannot hold a session is checked less and less often (up to every 5 min), so the link does not keep dropping.
-- **Whichever answers first** never moves a working link.
+### R49 — Preferred network is chosen at connect time, with no background checks (19 Nov 2026)
+Owner: "every 5 second is put a load … as soon as the software opens and it sees that the preferred one is [cable], it should do that … if a user stop our application and starts again it should … use … the selected by user whether it is wi-fi or the [cable] … i don't want that thing".
+- **Every time Dyavon connects** (at start, after a restart, after a reconnect), it uses the preferred network if that network answers, judged at **both** ends (B76). Only if it does not answer does it use the other one.
+- **Cable first** and **Wi-Fi first** work the same way, mirrored. **Whichever answers first** takes the first answer.
+- **No background checking.** A link that fell back to the other network stays there until the next connect: restarting Dyavon, the link dropping, or this computer's network changing (for example turning its Wi-Fi off).
+- A preferred address that accepts the connection but cannot start a session is tried last for 60 s, so it cannot keep the link off the other network.
+- *Agreed and then withdrawn the same day:* checking every 5 s and moving the link back (B77). The owner did not want the extra load.

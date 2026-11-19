@@ -97,9 +97,6 @@ pub enum DisconnectReason {
     /// This machine's network changed (a cable, Wi-Fi, a new address). The session is
     /// dropped on purpose so the client reconnects over whichever path is now best.
     NetworkChanged,
-    /// The preferred network (Settings › Preferred network) answered while the link was on
-    /// another one. The session is dropped on purpose so the client reconnects over it.
-    BetterPath,
     /// The server accepted a newer connection from the same peer and replaced this one.
     Superseded,
 }
@@ -113,7 +110,6 @@ impl DisconnectReason {
                 | DisconnectReason::TimedOut
                 | DisconnectReason::Io(_)
                 | DisconnectReason::NetworkChanged
-                | DisconnectReason::BetterPath
         )
     }
 }
@@ -781,10 +777,7 @@ pub async fn run_client(
     // When the "still looking" line was last logged. While no server answers, one line a
     // minute says what this machine has, what it heard and what it tried.
     let mut looking_logged: Option<std::time::Instant> = None;
-    // Moving to the preferred network once it answers (B77). How often to look, doubled
-    // each time a move does not hold, and the addresses that just failed after connecting.
-    let mut probe_every = BETTER_PROBE_FIRST;
-    let mut moved_for_better = false;
+    // Addresses that accepted the connection and then failed, tried last for a minute.
     let mut avoid: Vec<(SocketAddr, std::time::Instant)> = Vec::new();
 
     loop {
@@ -811,27 +804,18 @@ pub async fn run_client(
             }
         }
         let far_wifi = found.far_end_wifi(std::time::Instant::now());
-        // An address that accepted the connection and then failed is left out for a minute,
-        // so a cable that answers but does not work cannot hold the link off the Wi-Fi. Never
-        // the last address left.
+        // So a cable that answers but does not work cannot hold the link off the Wi-Fi (or
+        // the other way round). Never the last address left.
         avoid.retain(|(_, at)| at.elapsed() < AVOID_FOR);
-        let avoiding: Vec<SocketAddr> = avoid.iter().map(|(a, _)| *a).collect();
-        if targets.iter().any(|a| !avoiding.contains(a)) {
-            targets.retain(|a| !avoiding.contains(a));
+        if targets.iter().any(|a| !avoid.iter().any(|(x, _)| x == a)) {
+            targets.retain(|a| !avoid.iter().any(|(x, _)| x == a));
         }
-        let mut better = Better {
-            found: found.clone(),
-            only: only.clone(),
-            avoid: avoiding,
-            every: &mut probe_every,
-            moved: std::mem::take(&mut moved_for_better),
-            picked: None,
-        };
+        // Set again by `connect_once` the moment an address accepts the TCP connection.
+        let tried_from = last_good.take();
 
         let outcome = connect_once(
             &targets,
             &far_wifi,
-            &mut better,
             &cfg,
             params,
             &cancel,
@@ -846,12 +830,17 @@ pub async fn run_client(
             AttemptOutcome::Cancelled | AttemptOutcome::Fatal => return,
             AttemptOutcome::Lost { was_connected, reason } => {
                 let now = std::time::Instant::now();
-                if let (false, Some(a)) = (was_connected, better.picked) {
-                    if !crate::pin::awaiting() {
-                        tracing::info!("{a} accepted the connection but the session did not start; trying other addresses first for {}s", AVOID_FOR.as_secs());
+                match (was_connected, last_good) {
+                    (false, Some(a)) if !crate::pin::awaiting() => {
+                        tracing::info!(
+                            "{a} accepted the connection but the session did not start; trying other addresses first for {}s",
+                            AVOID_FOR.as_secs()
+                        );
                         avoid.push((a, now));
                         last_good = None;
                     }
+                    (false, None) => last_good = tried_from,
+                    _ => {}
                 }
                 if was_connected {
                     looking_logged = None;
@@ -871,10 +860,7 @@ pub async fn run_client(
                     reason
                 };
                 let recoverable = reason.is_recoverable();
-                if matches!(reason, DisconnectReason::BetterPath) {
-                    moved_for_better = true;
-                }
-                if matches!(reason, DisconnectReason::NetworkChanged | DisconnectReason::BetterPath) {
+                if matches!(reason, DisconnectReason::NetworkChanged) {
                     // The path we had is gone or no longer best. Forget it, so the next race
                     // decides afresh, and reconnect at once.
                     last_good = None;
@@ -929,7 +915,6 @@ pub async fn run_client(
 async fn connect_once(
     targets: &[SocketAddr],
     far_wifi: &[Ipv4Addr],
-    better: &mut Better<'_>,
     cfg: &Config,
     params: LinkParams,
     cancel: &CancellationToken,
@@ -972,9 +957,6 @@ async fn connect_once(
         };
     };
     *last_good = Some(addr);
-    better.picked = Some(addr);
-    let rank = path_rank(&addr, far_wifi, cfg.network_preference);
-    *better.every = next_probe_every(*better.every, better.moved, rank);
     health.set_peer(addr);
     tracing::info!(
         "link to {addr} goes out through {} (candidates tried: {listing}; server's Wi-Fi: [{}]; preference: {})",
@@ -1083,38 +1065,8 @@ async fn connect_once(
             }
         });
     }
-    // On a less preferred network: keep looking for the preferred one, and move the link
-    // there as soon as it answers (B77). "Whichever answers first" never moves.
-    let moved = Arc::new(std::sync::atomic::AtomicBool::new(false));
-    if rank > 0 && cfg.network_preference != crate::config::NetworkPreference::Fastest {
-        let (session, moved, pref, every) = (session.clone(), moved.clone(), cfg.network_preference, *better.every);
-        let (found, only, avoid) = (better.found.clone(), better.only.clone(), better.avoid.clone());
-        tracing::info!("the link is not on the preferred network ({pref}); checking for it every {}s", every.as_secs());
-        tokio::spawn(async move {
-            loop {
-                tokio::select! {
-                    _ = session.cancelled() => break,
-                    _ = tokio::time::sleep(every) => {
-                        let now = std::time::Instant::now();
-                        let wifi = found.far_end_wifi(now);
-                        let cands = found.candidates_for(now, only.as_deref());
-                        let rank_of = |a: &SocketAddr| path_rank(a, &wifi, pref);
-                        if let Some(at) = preferred_answering(&cands, rank_of, rank, &avoid).await {
-                            tracing::info!("the preferred network answers at {at}; moving the link there");
-                            moved.store(true, std::sync::atomic::Ordering::Relaxed);
-                            session.cancel();
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-    }
     let reason = pump(framed, params, &session, ch, health, net, motion).await;
-    session.cancel(); // stops the watchers
-    if moved.load(std::sync::atomic::Ordering::Relaxed) && !cancel.is_cancelled() {
-        return AttemptOutcome::Lost { was_connected: true, reason: DisconnectReason::BetterPath };
-    }
+    session.cancel(); // stops the watcher
     if revoked.load(std::sync::atomic::Ordering::Relaxed) && !cancel.is_cancelled() {
         return AttemptOutcome::Lost {
             was_connected: true,
@@ -1772,59 +1724,8 @@ async fn accept_any(
 /// to answer too. Short: on a working cable the answer takes about a millisecond.
 const PREFER_WAIT: Duration = Duration::from_millis(1000);
 
-/// While the link is on a less preferred network, how often to check for the preferred one
-/// at first, and at most after moves that did not hold.
-const BETTER_PROBE_FIRST: Duration = Duration::from_secs(5);
-const BETTER_PROBE_MAX: Duration = Duration::from_secs(300);
-/// How long one check waits for the preferred network to answer.
-const BETTER_PROBE_TRY: Duration = Duration::from_secs(1);
 /// How long an address that accepted the connection and then failed is tried last.
 const AVOID_FOR: Duration = Duration::from_secs(60);
-
-/// How often to check for the preferred network next. A move to it that landed on another
-/// network again doubles the wait (up to [`BETTER_PROBE_MAX`]), so a cable that answers but
-/// cannot hold a session is not retried every few seconds; being on it resets the wait.
-fn next_probe_every(every: Duration, after_move: bool, rank: u8) -> Duration {
-    if rank == 0 {
-        BETTER_PROBE_FIRST
-    } else if after_move {
-        (every * 2).min(BETTER_PROBE_MAX)
-    } else {
-        every
-    }
-}
-
-/// The first of `cands` that ranks better than `current` (lower), is not in `avoid` and
-/// accepts a TCP connection within [`BETTER_PROBE_TRY`]. The test connection is closed at once;
-/// the server takes it for a scan.
-async fn preferred_answering(
-    cands: &[SocketAddr],
-    rank_of: impl Fn(&SocketAddr) -> u8,
-    current: u8,
-    avoid: &[SocketAddr],
-) -> Option<SocketAddr> {
-    let preferred: Vec<SocketAddr> =
-        cands.iter().copied().filter(|a| a.is_ipv4() && !avoid.contains(a) && rank_of(a) < current).collect();
-    if preferred.is_empty() {
-        return None;
-    }
-    let probe = crate::config::NetworkPreference::Fastest;
-    race_connect(&preferred, &[], BETTER_PROBE_TRY, probe).await.map(|(a, _)| a)
-}
-
-/// What one connection attempt needs for moving to the preferred network (B77).
-struct Better<'a> {
-    found: beacon::Found,
-    only: Option<String>,
-    /// Addresses to leave out of the checks: they just failed after connecting.
-    avoid: Vec<SocketAddr>,
-    /// How often to check; doubled here when a move did not hold.
-    every: &'a mut Duration,
-    /// This attempt follows a move to the preferred network.
-    moved: bool,
-    /// Set when an address accepts the TCP connection.
-    picked: Option<SocketAddr>,
-}
 
 /// How much `pref` wants `addr`, lower first: the network it is reached on directly (its
 /// subnet is one of this machine's), then any network, then through a router or tunnel.
@@ -3500,32 +3401,6 @@ mod tests {
         ];
         let got = race_connect(&targets, &[], Duration::from_secs(2), crate::config::NetworkPreference::Fastest).await;
         assert_eq!(got.map(|(a, _)| a), Some(live_addr));
-    }
-
-    #[tokio::test]
-    async fn the_watcher_finds_a_preferred_address_only_when_it_answers() {
-        let cable_l = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let cable = cable_l.local_addr().unwrap();
-        let wifi_l = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let wifi = wifi_l.local_addr().unwrap();
-        let dead = SocketAddr::from(([127, 0, 0, 1], free_port().await));
-        // Ranks as "Cable first" sees them while the link is on the Wi-Fi (rank 1).
-        let rank_of = |a: &SocketAddr| if *a == cable || *a == dead { 0 } else { 1 };
-
-        assert_eq!(preferred_answering(&[wifi, cable], rank_of, 1, &[]).await, Some(cable));
-        assert_eq!(preferred_answering(&[wifi, dead], rank_of, 1, &[]).await, None, "a cable that does not answer is not a move");
-        assert_eq!(preferred_answering(&[wifi, cable], rank_of, 1, &[cable]).await, None, "an address that just failed is left out");
-        assert_eq!(preferred_answering(&[wifi], rank_of, 1, &[]).await, None, "the same network is not better");
-        assert_eq!(preferred_answering(&[cable], rank_of, 0, &[]).await, None, "already on the cable: nothing to move to");
-    }
-
-    #[test]
-    fn checks_slow_down_only_when_a_move_does_not_hold() {
-        let first = BETTER_PROBE_FIRST;
-        assert_eq!(next_probe_every(first, false, 1), first, "on the Wi-Fi from the start: the usual pace");
-        assert_eq!(next_probe_every(first, true, 1), first * 2, "moved to the cable but landed on the Wi-Fi again");
-        assert_eq!(next_probe_every(BETTER_PROBE_MAX, true, 1), BETTER_PROBE_MAX);
-        assert_eq!(next_probe_every(first * 8, true, 0), first, "on the cable: back to the usual pace");
     }
 
     #[tokio::test]

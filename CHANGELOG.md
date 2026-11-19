@@ -16,9 +16,10 @@ Dates are when the work was committed. Item codes refer to
 - **B76: "Cable first" now really prefers the cable.** The server says which of its
   addresses are on Wi-Fi, so a client that reaches the laptop's Wi-Fi through its own
   Ethernet port no longer counts that path as cable.
-- **B77: the link goes back to the preferred network by itself.** On Wi-Fi after a cable
-  problem, Dyavon checks every few seconds and moves the link back to the cable as soon as
-  it answers (and the other way round for "Wi-Fi first"). See R49.
+- **Preferred network at every connect (R49).** Each time Dyavon connects, including after
+  a restart, it takes the preferred network if it answers, and only otherwise the other
+  one. A preferred address that connects but cannot start a session is tried last for a
+  minute. There is no background checking.
 - The in-app update check now looks at this repository's releases (it pointed at a
   separate downloads repository that was never created).
 

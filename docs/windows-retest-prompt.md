@@ -16,8 +16,8 @@ Invoke-WebRequest -Uri http://192.168.137.2:8000/dyavon.exe -OutFile $HOME\dyavo
 Get-FileHash $HOME\dyavon\dyavon.exe -Algorithm SHA256
 ```
 
-Must match exactly — size `13599232` bytes, SHA256
-`082A6796C1AD2CCCAB424D620BBD3CC068975D1107AF16B227526F3BD943C59E`.
+Must match exactly — size `13581824` bytes, SHA256
+`89BBBBC2B1114ACF2112C709AD9ED3EF1A1AFA0082AD00C416AA365E9980E7EB`.
 If it doesn't match, stop and tell me.
 
 Note your current state, carried over from last time: **`Start at login` is ON**,
