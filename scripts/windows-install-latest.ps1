@@ -39,6 +39,14 @@ $appsKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Dyavon'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 function Say($m) { Write-Host "  $m" }
+function Native([scriptblock]$cmd) {
+    # Windows PowerShell 5.1 turns a program's error output into a terminating error when
+    # $ErrorActionPreference is Stop, so an ordinary "not found" from schtasks or netsh would
+    # end the script. Run such programs with Continue and read $LASTEXITCODE instead.
+    $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try { & $cmd *> $null } finally { $ErrorActionPreference = $prev }
+    return $LASTEXITCODE
+}
 function Run-Helper($argument) {
     # dyavon.exe is a windowed program: PowerShell would not wait for it without -Wait.
     $p = Start-Process -FilePath $exe -ArgumentList $argument -Wait -PassThru -WindowStyle Hidden
@@ -110,8 +118,7 @@ Say 'desktop and Start-menu shortcuts made; Dyavon is listed in Settings > Apps'
 
 # --- 5. firewall ----------------------------------------------------------------------
 foreach ($rule in @('mouse-rs', 'mouse-rs (elevated)')) {
-    netsh advfirewall firewall delete rule name="$rule" *> $null
-    if ($LASTEXITCODE -eq 0) { Say "removed the old firewall rule '$rule'" }
+    if ((Native { netsh advfirewall firewall delete rule name="$rule" }) -eq 0) { Say "removed the old firewall rule '$rule'" }
 }
 $rc = Run-Helper 'firewall-allow'
 if ($rc -eq 0) { Say 'firewall: Dyavon is allowed' }
@@ -124,9 +131,8 @@ if (Get-ItemProperty -Path $runKey -Name 'mouse-rs' -ErrorAction SilentlyContinu
 }
 Set-ItemProperty -Path $runKey -Name 'dyavon' -Value ('"' + $exe + '"')
 Say 'Dyavon starts at login'
-schtasks.exe /Query /TN 'mouse-rs (elevated)' *> $null
-if ($LASTEXITCODE -eq 0) {
-    schtasks.exe /Delete /TN 'mouse-rs (elevated)' /F *> $null
+if ((Native { schtasks.exe /Query /TN 'mouse-rs (elevated)' }) -eq 0) {
+    Native { schtasks.exe /Delete /TN 'mouse-rs (elevated)' /F } | Out-Null
     $rc = Run-Helper 'autostart-elevated-on'
     if ($rc -eq 0) { Say "moved the 'as administrator' login task from mouse-rs to Dyavon" }
     else { Say "WARNING: removed the mouse-rs administrator task but could not make Dyavon's (exit $rc). Turn it on in Dyavon's settings." }
